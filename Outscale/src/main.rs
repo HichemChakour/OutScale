@@ -10,5 +10,4 @@ fn main() {
     // Appeler les méthodes de Sword
     sword.display_info();
     println!("Puissance : {}", sword.calculate_power());
-    println!("Le zizi de Amadou est vreuuuument énormimous bebou, puis-je le lécher goulûment ?")
 }
