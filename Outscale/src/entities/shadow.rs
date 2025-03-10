@@ -1,3 +1,4 @@
+use crate::entities::enemy::Enemy;
 use super::entity::Entity;
 
 pub struct Shadow {
@@ -13,7 +14,7 @@ impl Shadow {
         self.entity.based_attack()
     }
 
-    pub fn use_skills(&self, skill_index: usize) -> Result<String, String> {
-        self.entity.use_skills(skill_index)
+    pub fn use_skills(&mut self, skill_index: usize, target: &mut Entity) -> Result<String, String> {
+        self.entity.use_skills(skill_index, target)
     }
 }
