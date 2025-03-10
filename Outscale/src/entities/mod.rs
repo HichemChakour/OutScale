@@ -1,2 +1,4 @@
-// Outscale/src/Entity/mod.rs
 pub mod entity;
+pub mod player;
+pub mod enemy;
+pub mod shadow;
