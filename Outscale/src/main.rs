@@ -1,3 +1,7 @@
+mod outscale;
+
+
 fn main() {
-    println!("Hello, world!");
-}
+    //Lancer le jeu
+    outscale::run();
+} 
