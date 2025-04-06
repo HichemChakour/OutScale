@@ -173,6 +173,12 @@ BEGIN
     UPDATE shadow SET i_n_id = (SELECT last_insert_rowid()) WHERE va_nom = NEW.va_nom;
 END;
 
+CREATE TABLE IF NOT EXISTS journal (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    texte TEXT DEFAULT NULL,
+    date DATE DEFAULT (DATE('now'))
+);
+
 CREATE TRIGGER IF NOT EXISTS after_insert_objet
 AFTER INSERT ON objet
 FOR EACH ROW
