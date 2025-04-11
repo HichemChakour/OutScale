@@ -10,13 +10,15 @@ DROP TABLE IF EXISTS classe;
 DROP TABLE IF EXISTS skills;
 DROP TABLE IF EXISTS liste_skills;
 DROP TABLE IF EXISTS type_objet;
+Drop TABLE IF EXISTS action;
+Drop TABLE IF EXISTS zone;
 DROP TRIGGER IF EXISTS after_insert_player;
 DROP TRIGGER IF EXISTS after_insert_ennemi;
 DROP TRIGGER IF EXISTS after_insert_shadow;
 -- Création des tables
 CREATE TABLE IF NOT EXISTS player (
-    p_n_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    va_nom TEXT DEFAULT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT DEFAULT NULL,
     hp INTEGER DEFAULT NULL,
     mana INTEGER DEFAULT NULL,
     magic_resist INTEGER DEFAULT NULL,
@@ -24,14 +26,14 @@ CREATE TABLE IF NOT EXISTS player (
     attack_damage INTEGER DEFAULT NULL,
     magic_damage INTEGER DEFAULT NULL,
     dodge_chance INTEGER DEFAULT NULL,
-    iv_skills_id INTEGER DEFAULT NULL,
-    i_n_id INTEGER DEFAULT NULL,
-    FOREIGN KEY(iv_skills_id) REFERENCES inventaire_skills(iv_skills_id),
-    FOREIGN KEY(i_n_id) REFERENCES inventaire(i_n_id)
+    inventaire_skills_id INTEGER DEFAULT NULL,
+    inventaire_id INTEGER DEFAULT NULL,
+    FOREIGN KEY(inventaire_skills_id) REFERENCES inventaire_skills(id),
+    FOREIGN KEY(inventaire_id) REFERENCES inventaire(id)
 );
 
 CREATE TABLE IF NOT EXISTS ennemi (
-    va_nom TEXT DEFAULT NULL,
+    nom TEXT DEFAULT NULL,
     entite_name TEXT DEFAULT NULL,
     hp INTEGER DEFAULT NULL,
     mana INTEGER DEFAULT NULL,
@@ -40,17 +42,17 @@ CREATE TABLE IF NOT EXISTS ennemi (
     attack_damage INTEGER DEFAULT NULL,
     magic_damage INTEGER DEFAULT NULL,
     dodge_chance INTEGER DEFAULT NULL,
-    n_xp INTEGER DEFAULT NULL,
+    xp INTEGER DEFAULT NULL,
     classe_id INTEGER NOT NULL,
-    iv_skills_id INTEGER DEFAULT NULL,
-    i_n_id INTEGER DEFAULT NULL,
+    inventaire_skills_id INTEGER DEFAULT NULL,
+    inventaire_id INTEGER DEFAULT NULL,
     FOREIGN KEY(classe_id) REFERENCES classe(classe_id),
-    FOREIGN KEY(iv_skills_id) REFERENCES inventaire_skills(iv_skills_id),
-    FOREIGN KEY(i_n_id) REFERENCES inventaire(i_n_id)
+    FOREIGN KEY(inventaire_skills_id) REFERENCES inventaire_skills(id),
+    FOREIGN KEY(inventaire_id) REFERENCES inventaire(id)
 );
 
 CREATE TABLE IF NOT EXISTS shadow (
-    va_nom TEXT DEFAULT NULL,
+    nom TEXT DEFAULT NULL,
     entite_name TEXT DEFAULT NULL,
     hp INTEGER DEFAULT NULL,
     mana INTEGER DEFAULT NULL,
@@ -61,27 +63,26 @@ CREATE TABLE IF NOT EXISTS shadow (
     dodge_chance INTEGER DEFAULT NULL,
     liste_skills TEXT DEFAULT NULL,
     classe_id INTEGER NOT NULL,
-    iv_skills_id INTEGER DEFAULT NULL,
-    i_n_id INTEGER DEFAULT NULL,
+    inventaire_skills_id INTEGER DEFAULT NULL,
+    inventaire_id INTEGER DEFAULT NULL,
     FOREIGN KEY(classe_id) REFERENCES classe(classe_id),
-    FOREIGN KEY(iv_skills_id) REFERENCES inventaire_skills(iv_skills_id),
-    FOREIGN KEY(i_n_id) REFERENCES inventaire(i_n_id)
+    FOREIGN KEY(inventaire_skills_id) REFERENCES inventaire_skills(id),
+    FOREIGN KEY(inventaire_id) REFERENCES inventaire(id)
 );
 
 CREATE TABLE IF NOT EXISTS inventaire (
-    i_n_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    e_id INTEGER,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entite_id INTEGER,
     equipement_tete INTEGER,
     equipement_torse INTEGER,
     equipement_jambe INTEGER,
     main1 INTEGER,
     main2 INTEGER,
-    de_qui TEXT DEFAULT NULL,
-    FOREIGN KEY(e_id) REFERENCES entite(e_id)
+    FOREIGN KEY(entite_id) REFERENCES entite(id)
 );
 
 CREATE TABLE IF NOT EXISTS objet (
-    o_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT DEFAULT NULL,
     degats INTEGER DEFAULT NULL,
     armure INTEGER DEFAULT NULL,
@@ -93,25 +94,25 @@ CREATE TABLE IF NOT EXISTS objet (
     nombre_main INTEGER DEFAULT NULL,
     hp INTEGER DEFAULT NULL,
     type_objet_id INTEGER,
-    iv_skills_id INTEGER DEFAULT NULL,
-    FOREIGN KEY(type_objet_id) REFERENCES type_objet(type_objet_id),
-    FOREIGN KEY(iv_skills_id) REFERENCES inventaire_skills(iv_skills_id)
+    inventaire_skills_id INTEGER DEFAULT NULL,
+    FOREIGN KEY(type_objet_id) REFERENCES type_objet(id),
+    FOREIGN KEY(inventaire_skills_id) REFERENCES inventaire_skills(id)
 );
 
 CREATE TABLE IF NOT EXISTS liste_objet (
-    liste_objet_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    o_id INTEGER,
-    i_n_id INTEGER,
-    FOREIGN KEY(o_id) REFERENCES objet(o_id),
-    FOREIGN KEY(i_n_id) REFERENCES inventaire(i_n_id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    objet_id INTEGER,
+    inventaire_id INTEGER,
+    FOREIGN KEY(objet_id) REFERENCES objet(id),
+    FOREIGN KEY(inventaire_id) REFERENCES inventaire(id)
 );
 
 CREATE TABLE IF NOT EXISTS inventaire_skills (
-    iv_skills_id INTEGER PRIMARY KEY AUTOINCREMENT
+    id INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
 CREATE TABLE IF NOT EXISTS classe (
-    classe_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT DEFAULT NULL
 );
 
@@ -129,15 +130,14 @@ CREATE TABLE IF NOT EXISTS skills (
 );
 
 CREATE TABLE IF NOT EXISTS liste_skills (
-    liste_skills_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    iv_skills_id INTEGER,
-    id INTEGER,
-    FOREIGN KEY(iv_skills_id) REFERENCES inventaire_skills(iv_skills_id),
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    inventaire_skills_id INTEGER,
+    FOREIGN KEY(inventaire_skills_id) REFERENCES inventaire_skills(id),
     FOREIGN KEY(id) REFERENCES skills(id)
 );
 
 CREATE TABLE IF NOT EXISTS type_objet (
-    type_objet_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     type_objet TEXT DEFAULT NULL,
     desc_objet TEXT DEFAULT NULL
 );
@@ -147,37 +147,37 @@ CREATE TRIGGER IF NOT EXISTS after_insert_player
 AFTER INSERT ON player
 FOR EACH ROW
 BEGIN
-    INSERT INTO inventaire_skills (iv_skills_id) VALUES (NULL);
-    UPDATE player SET iv_skills_id = (SELECT last_insert_rowid()) WHERE p_n_id = NEW.p_n_id;
-    INSERT INTO inventaire (e_id, de_qui) VALUES (NEW.p_n_id, NEW.va_nom);
-    UPDATE player SET i_n_id = (SELECT last_insert_rowid()) WHERE p_n_id = NEW.p_n_id;
+    INSERT INTO inventaire_skills (id) VALUES (NULL);
+    UPDATE player SET inventaire_skills_id = (SELECT last_insert_rowid()) WHERE id = NEW.id;
+    INSERT INTO inventaire (entite_id) VALUES (NEW.id);
+    UPDATE player SET inventaire_id = (SELECT last_insert_rowid()) WHERE id = NEW.id;
 END;
 
 CREATE TRIGGER IF NOT EXISTS after_insert_ennemi
 AFTER INSERT ON ennemi
 FOR EACH ROW
 BEGIN
-    INSERT INTO inventaire_skills (iv_skills_id) VALUES (NULL);
-    UPDATE ennemi SET iv_skills_id = (SELECT last_insert_rowid()) WHERE va_nom = NEW.va_nom;
-    INSERT INTO inventaire (e_id, de_qui) VALUES (NEW.i_n_id, NEW.va_nom);
-    UPDATE ennemi SET i_n_id = (SELECT last_insert_rowid()) WHERE va_nom = NEW.va_nom;
+    INSERT INTO inventaire_skills (id) VALUES (NULL);
+    UPDATE ennemi SET inventaire_skills_id = (SELECT last_insert_rowid()) WHERE nom = NEW.nom;
+    INSERT INTO inventaire (entite_id) VALUES (NEW.inventaire_id);
+    UPDATE ennemi SET inventaire_id = (SELECT last_insert_rowid()) WHERE nom = NEW.nom;
 END;
 
 CREATE TRIGGER IF NOT EXISTS after_insert_shadow
 AFTER INSERT ON shadow
 FOR EACH ROW
 BEGIN
-    INSERT INTO inventaire_skills (iv_skills_id) VALUES (NULL);
-    UPDATE shadow SET iv_skills_id = (SELECT last_insert_rowid()) WHERE va_nom = NEW.va_nom;
-    INSERT INTO inventaire (e_id, de_qui) VALUES (NEW.i_n_id, NEW.va_nom);
-    UPDATE shadow SET i_n_id = (SELECT last_insert_rowid()) WHERE va_nom = NEW.va_nom;
+    INSERT INTO inventaire_skills (id) VALUES (NULL);
+    UPDATE shadow SET inventaire_skills_id = (SELECT last_insert_rowid()) WHERE nom = NEW.nom;
+    INSERT INTO inventaire (entite_id) VALUES (NEW.inventaire_id);
+    UPDATE shadow SET inventaire_id = (SELECT last_insert_rowid()) WHERE nom = NEW.nom;
 END;
 
 CREATE TRIGGER IF NOT EXISTS after_insert_objet
 AFTER INSERT ON objet
 FOR EACH ROW
 BEGIN
-    INSERT INTO liste_objet (o_id, i_n_id) VALUES (NEW.o_id, NEW.i_n_id);
+    INSERT INTO liste_objet (id, inventaire_id) VALUES (NEW.id, NEW.id);
 END;
 
 -- Insertion des classes
