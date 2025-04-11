@@ -142,6 +142,11 @@ CREATE TABLE IF NOT EXISTS type_objet (
     desc_objet TEXT DEFAULT NULL
 );
 
+CREATE TABLE IF NOT EXISTS zones(
+    nom VARCHAR2(70) PRIMARY KEY,
+    cleared BOOLEAN DEFAULT FALSE
+);
+
 -- Création des déclencheurs
 CREATE TRIGGER IF NOT EXISTS after_insert_player
 AFTER INSERT ON player
