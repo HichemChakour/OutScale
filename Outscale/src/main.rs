@@ -1,7 +1,8 @@
 mod outscale;
 
+use std::process::Command;
+
 
 fn main() {
-    //Lancer le jeu
     outscale::run();
 } 

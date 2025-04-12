@@ -2,17 +2,23 @@ use rusqlite::{params, Connection, Result};
 use std::path::Path;
 mod database_manager;
 mod init_tables;
-// struct qui  le jeu en 
-// à l'appel on choisi un fichier de sauvegarde et on lance le jeu 
-// Si le fichier n'existe pas on lance une nouvelle partie qui créera un fichier de sauvegarde
+mod cli_manager;
+use std::env;
+
+const RESOURCE_DIR: &str = "src/resources";
+const DB_PATH: &str = "src/save.db";
+
+pub fn get_db_path() -> String {
+    let current_dir = env::current_dir().unwrap();
+    format!("{}/src/save.db", current_dir.display())
+}
 
 pub fn run() {
-    let db_path = "./src/save.db";
 
-    if !database_manager::DatabaseManager::file_exists(db_path) {
+    if !database_manager::DatabaseManager::file_exists(DB_PATH) {
         println!("Le fichier save.db n'existe pas. Création d'une nouvelle partie...");
 
-        let db_manager = database_manager::DatabaseManager::new(db_path).unwrap();
+        let db_manager = database_manager::DatabaseManager::new(DB_PATH).unwrap();
         if let Err(e) = db_manager.execute_sql_file("././insertBDD/init_db.sql") {
             eprintln!("Erreur lors de l'exécution du fichier SQL : {}", e);
             return;
@@ -22,7 +28,7 @@ pub fn run() {
     }
 
     // Instanciation de DatabaseManager
-    let db_manager = match database_manager::DatabaseManager::new(db_path) {
+    let db_manager = match database_manager::DatabaseManager::new(DB_PATH) {
         Ok(manager) => manager,
         Err(e) => {
             eprintln!("Erreur lors de la connexion à la base de données : {}", e);
@@ -33,6 +39,7 @@ pub fn run() {
     match db_manager.has_player_data() {
         Ok(true) => {
             println!("Une partie existante a été trouvée. Chargement...");
+            lancement_mode_histoire();
         }
         Ok(false) => {
             if let Err(e) = db_manager.insert_player() {
@@ -51,5 +58,5 @@ pub fn run() {
 }
 
 pub fn lancement_mode_histoire() {
-        println!("Le mode histoire a été lancé avec succès.");
-    }
+   cli_manager::redaction_histoire(&*(RESOURCE_DIR.to_owned() + "/dialogue/Introduction.txt"));
+}
