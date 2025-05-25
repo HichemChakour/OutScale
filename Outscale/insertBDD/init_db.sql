@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS player (
     armor INTEGER DEFAULT NULL,
     attack_damage INTEGER DEFAULT NULL,
     magic_damage INTEGER DEFAULT NULL,
+    speed INTEGER DEFAULT NULL,
     dodge_chance INTEGER DEFAULT NULL,
     inventaire_skills_id INTEGER DEFAULT NULL,
     inventaire_id INTEGER DEFAULT NULL,
@@ -41,6 +42,7 @@ CREATE TABLE IF NOT EXISTS ennemi (
     armor INTEGER DEFAULT NULL,
     attack_damage INTEGER DEFAULT NULL,
     magic_damage INTEGER DEFAULT NULL,
+    speed INTEGER DEFAULT NULL,
     dodge_chance INTEGER DEFAULT NULL,
     xp INTEGER DEFAULT NULL,
     classe_id INTEGER NOT NULL,
@@ -60,6 +62,7 @@ CREATE TABLE IF NOT EXISTS shadow (
     armor INTEGER DEFAULT NULL,
     attack_damage INTEGER DEFAULT NULL,
     magic_damage INTEGER DEFAULT NULL,
+    speed INTEGER DEFAULT NULL,
     dodge_chance INTEGER DEFAULT NULL,
     liste_skills TEXT DEFAULT NULL,
     classe_id INTEGER NOT NULL,
@@ -116,6 +119,7 @@ CREATE TABLE IF NOT EXISTS classe (
     nom TEXT DEFAULT NULL
 );
 
+-- table qui répertorie toutes les compétences de la bdd
 CREATE TABLE IF NOT EXISTS skills (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT DEFAULT NULL,
@@ -129,6 +133,7 @@ CREATE TABLE IF NOT EXISTS skills (
     hp INTEGER DEFAULT NULL
 );
 
+-- table qui répertorie toutes les compétences de acquises de tout les personnages de la bdd
 CREATE TABLE IF NOT EXISTS liste_skills (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     inventaire_skills_id INTEGER,
@@ -193,7 +198,7 @@ INSERT INTO classe (nom) VALUES ('Rodeur');
 INSERT INTO classe (nom) VALUES ('Tank');
 
 -- Insertion des types d'objets
-INSERT INTO type_objet (type_objet, desc_objet) VALUES ('Armes', 'Objets utilisés pour infliger des dégâts');
+INSERT INTO type_objet (type_objet, desc_objet) VALUES ('Arme', 'Objets utilisés pour infliger des dégâts');
 INSERT INTO type_objet (type_objet, desc_objet) VALUES ('Casque', 'Équipement de tête offrant une protection');
 INSERT INTO type_objet (type_objet, desc_objet) VALUES ('Plastron', 'Équipement de torse offrant une protection');
 INSERT INTO type_objet (type_objet, desc_objet) VALUES ('Jambiere', 'Équipement de jambes offrant une protection');

@@ -3,7 +3,12 @@ use std::path::Path;
 mod database_manager;
 mod init_tables;
 mod cli_manager;
+mod combat_manager;
+mod EnnemiManager;
+
 use std::env;
+use crate::entities::entity::{Entity, HasEntity};
+use crate::outscale::combat_manager::CombatManager;
 
 const RESOURCE_DIR: &str = "src/resources";
 const DB_PATH: &str = "src/save.db";
@@ -57,6 +62,60 @@ pub fn run() {
     }
 }
 
+pub fn testCombat(){
+    let boule_de_feu = crate::skills::skill::Skill::new(
+        "Boule de Feu".to_string(),
+        0, 10, 0, 0, 0, 0, 0, 20, 0, 30, 0, false,
+    );
+
+    let coup_de_poing = crate::skills::skill::Skill::new(
+        "Coup de Poing".to_string(),
+        0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, false,
+    );
+
+    let heal = crate::skills::skill::Skill::new(
+        "Soin".to_string(),
+        20, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, true,
+    );
+    let hero = Box::new(crate::entities::player::Player::new(Entity::new(
+        "Hero".to_string(),
+        500, 50, 10, 5, 20, 15, 10, 50.0,
+        vec![boule_de_feu.clone(), coup_de_poing.clone()],
+        1,
+    ))) as Box<dyn HasEntity>;
+
+    let enemy1 = Box::new(crate::entities::enemy::Enemy::new(Entity::new(
+        "Enemy1".to_string(),
+        80, 30, 8, 4, 15, 10, 12, 50.0,
+        vec![boule_de_feu.clone(), coup_de_poing.clone()],
+        1,
+    ))) as Box<dyn HasEntity>;
+
+    let enemy2 = Box::new(crate::entities::enemy::Enemy::new(Entity::new(
+        "Enemy2".to_string(),
+        90, 40, 9, 6, 18, 12, 11, 50.0,
+        vec![heal.clone()],
+        1,
+    ))) as Box<dyn HasEntity>;
+
+    let mut combat_manager = CombatManager::new(vec![hero], vec![enemy1, enemy2]);
+
+    println!("Le combat commence !");
+    while !combat_manager.allies.is_empty() && !combat_manager.enemies.is_empty() {
+        combat_manager.next_turn();
+
+        // Vérifier si un camp a été vaincu
+        combat_manager.allies.retain(|ally| ally.entity().hp > 0);
+        combat_manager.enemies.retain(|enemy| enemy.entity().hp > 0);
+    }
+
+    if combat_manager.allies.is_empty() {
+        println!("Les ennemis ont gagné !");
+    } else {
+        println!("Les alliés ont gagné !");
+    }
+
+}
 pub fn lancement_mode_histoire() {
    cli_manager::redaction_histoire(&*(RESOURCE_DIR.to_owned() + "/dialogue/Introduction.txt"));
 }

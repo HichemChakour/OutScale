@@ -1,6 +1,6 @@
 use crate::entities::entity::Entity;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone,PartialEq)]
 pub struct Skill {
     pub name: String,
     pub hp_refound: i32,

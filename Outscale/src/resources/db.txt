@@ -1,0 +1,4 @@
+Commande pour réinitialiser la base de données :
+Get-Content O:\Ecole\Rust\projet\Outscale\insertBDD\init_db.sql | sqlite3 O:\Ecole\Rust\projet\Outscale\src\save.db
+
+Get-Content O:\Ecole\Rust\projet\Outscale\insertBDD\insert_ennemies.sql | sqlite3 O:\Ecole\Rust\projet\Outscale\src\save.db
