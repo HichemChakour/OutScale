@@ -20,7 +20,7 @@ pub fn get_db_path() -> String {
 
 pub fn run() {
 
-    if !database_manager::DatabaseManager::file_exists(DB_PATH) {
+    /*if !database_manager::DatabaseManager::file_exists(DB_PATH) {
         println!("Le fichier save.db n'existe pas. Création d'une nouvelle partie...");
 
         let db_manager = database_manager::DatabaseManager::new(DB_PATH).unwrap();
@@ -59,7 +59,10 @@ pub fn run() {
             eprintln!("Erreur lors de la vérification de la table player : {}", e);
             return;
         }
-    }
+    }*/
+
+    testCombat();
+    return;
 }
 
 pub fn testCombat(){

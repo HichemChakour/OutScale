@@ -1,5 +1,6 @@
-use crate::entities::enemy::Enemy;
-use super::entity::Entity;
+use std::any::Any;
+// shadow.rs
+use super::entity::{Entity, HasEntity};
 
 pub struct Shadow {
     pub entity: Entity,
@@ -9,13 +10,14 @@ impl Shadow {
     pub fn new(entity: Entity) -> Self {
         Shadow { entity }
     }
+}
 
-    pub fn based_attack(&self) -> i32 {
-        self.entity.based_attack()
+impl HasEntity for Shadow {
+    fn entity(&self) -> &Entity {
+        &self.entity
     }
-
-    pub fn use_skills(&mut self, skill_index: usize, target: &mut Entity) -> Result<String, String> {
-        self.entity.use_skills(skill_index, target)
+    fn entity_mut(&mut self) -> &mut Entity {
+        &mut self.entity
     }
     fn as_any(&self) -> &dyn Any {
         self
