@@ -1,6 +1,6 @@
 use std::any::Any;
 use crate::skills::skill::Skill;
-
+use crate::skills::inventaire::Inventaire;
 #[derive(Debug, PartialEq, Clone)]
 pub struct Entity {
     pub name: String,
@@ -14,6 +14,7 @@ pub struct Entity {
     pub dodge_chance: f32,
     pub skills: Vec<Skill>,
     pub level: i32,
+    pub inventaire: Option<Inventaire>
 }
 
 impl Entity {
@@ -29,6 +30,7 @@ impl Entity {
         dodge_chance: f32,
         skills: Vec<Skill>,
         level: i32,
+        inventaire: Option<Inventaire>,
     ) -> Self {
         Entity {
             name,
@@ -42,6 +44,7 @@ impl Entity {
             dodge_chance,
             skills,
             level,
+            inventaire
         }
     }
 
