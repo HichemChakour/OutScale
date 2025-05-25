@@ -1,4 +1,7 @@
-use super::entity::Entity;
+use std::any::Any;
+// enemy.rs
+use super::entity::{Entity, HasEntity};
+
 
 pub struct Enemy {
     pub entity: Entity,
@@ -8,13 +11,14 @@ impl Enemy {
     pub fn new(entity: Entity) -> Self {
         Enemy { entity }
     }
+}
 
-    pub fn based_attack(&self) -> i32 {
-        self.entity.based_attack()
+impl HasEntity for Enemy {
+    fn entity(&self) -> &Entity {
+        &self.entity
     }
-
-    pub fn use_skills(&mut self, skill_index: usize, target: &mut Entity) -> Result<String, String> {
-        self.entity.use_skills(skill_index, target)
+    fn entity_mut(&mut self) -> &mut Entity {
+        &mut self.entity
     }
     fn as_any(&self) -> &dyn Any {
         self

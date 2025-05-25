@@ -1,6 +1,6 @@
 use std::any::Any;
 use crate::skills::skill::Skill;
-
+use crate::skills::inventaire::Inventaire;
 #[derive(Debug, PartialEq, Clone)]
 pub struct Entity {
     pub name: String,
@@ -14,6 +14,7 @@ pub struct Entity {
     pub dodge_chance: f32,
     pub skills: Vec<Skill>,
     pub level: i32,
+    pub inventaire: Option<Inventaire>
 }
 
 impl Entity {
@@ -29,6 +30,7 @@ impl Entity {
         dodge_chance: f32,
         skills: Vec<Skill>,
         level: i32,
+        inventaire: Option<Inventaire>,
     ) -> Self {
         Entity {
             name,
@@ -42,6 +44,7 @@ impl Entity {
             dodge_chance,
             skills,
             level,
+            inventaire
         }
     }
 
@@ -62,5 +65,36 @@ impl Entity {
         let damage_taken = std::cmp::min(damage, self.hp);
         self.hp -= damage_taken;
         damage_taken
+    }
+
+}
+
+pub trait HasEntity {
+    fn entity(&self) -> &Entity;
+    fn entity_mut(&mut self) -> &mut Entity;
+
+    fn based_attack(&self) -> i32 {
+        self.entity().based_attack()
+    }
+
+    fn use_skills(&mut self, skill_index: usize, target: &mut Entity) -> Result<String, String> {
+        self.entity_mut().use_skills(skill_index, target)
+    }
+
+    fn as_any(&self) -> &dyn Any;
+
+}
+
+impl Clone for Box<dyn HasEntity> {
+    fn clone(&self) -> Self {
+        if let Some(player) = self.as_any().downcast_ref::<crate::entities::player::Player>() {
+            Box::new((*player).clone()) // Déréférencement de `player` avant de cloner
+        } else if let Some(enemy) = self.as_any().downcast_ref::<crate::entities::enemy::Enemy>() {
+            Box::new((*enemy).clone()) // Déréférencement de `enemy` avant de cloner
+        } else if let Some(shadow) = self.as_any().downcast_ref::<crate::entities::shadow::Shadow>() {
+            Box::new((*shadow).clone()) // Déréférencement de `shadow` avant de cloner
+        } else {
+            panic!("Unsupported type for cloning");
+        }
     }
 }

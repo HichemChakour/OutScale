@@ -1,6 +1,6 @@
 use rusqlite::{params, Connection, Result};
 use std::path::Path;
-mod database_manager;
+pub(crate) mod database_manager;
 mod init_tables;
 mod cli_manager;
 mod combat_manager;
@@ -9,6 +9,7 @@ mod EnnemiManager;
 use std::env;
 use crate::entities::entity::{Entity, HasEntity};
 use crate::outscale::combat_manager::CombatManager;
+use crate::skills::inventaire::Inventaire;
 
 const RESOURCE_DIR: &str = "src/resources";
 const DB_PATH: &str = "src/save.db";
@@ -20,7 +21,7 @@ pub fn get_db_path() -> String {
 
 pub fn run() {
 
-    if !database_manager::DatabaseManager::file_exists(DB_PATH) {
+    /*if !database_manager::DatabaseManager::file_exists(DB_PATH) {
         println!("Le fichier save.db n'existe pas. Création d'une nouvelle partie...");
 
         let db_manager = database_manager::DatabaseManager::new(DB_PATH).unwrap();
@@ -59,8 +60,12 @@ pub fn run() {
             eprintln!("Erreur lors de la vérification de la table player : {}", e);
             return;
         }
-    }
+    }*/
+
+    testCombat();
+    return;
 }
+
 
 pub fn testCombat(){
     let boule_de_feu = crate::skills::skill::Skill::new(
@@ -77,25 +82,20 @@ pub fn testCombat(){
         "Soin".to_string(),
         20, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, true,
     );
-    let hero = Box::new(crate::entities::player::Player::new(Entity::new(
-        "Hero".to_string(),
-        500, 50, 10, 5, 20, 15, 10, 50.0,
-        vec![boule_de_feu.clone(), coup_de_poing.clone()],
-        1,
-    ))) as Box<dyn HasEntity>;
+    let hero = Box::new(crate::entities::player::Player::new(Entity::new("Hero".to_string(), 500, 50, 10, 5, 20, 15, 10, 50.0, vec![boule_de_feu.clone(), coup_de_poing.clone()], 1, None))) as Box<dyn HasEntity>;
 
     let enemy1 = Box::new(crate::entities::enemy::Enemy::new(Entity::new(
         "Enemy1".to_string(),
         80, 30, 8, 4, 15, 10, 12, 50.0,
         vec![boule_de_feu.clone(), coup_de_poing.clone()],
-        1,
+        1,None
     ))) as Box<dyn HasEntity>;
 
     let enemy2 = Box::new(crate::entities::enemy::Enemy::new(Entity::new(
         "Enemy2".to_string(),
         90, 40, 9, 6, 18, 12, 11, 50.0,
         vec![heal.clone()],
-        1,
+        1,None
     ))) as Box<dyn HasEntity>;
 
     let mut combat_manager = CombatManager::new(vec![hero], vec![enemy1, enemy2]);
