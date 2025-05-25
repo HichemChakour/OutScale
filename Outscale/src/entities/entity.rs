@@ -1,6 +1,7 @@
+use std::any::Any;
 use crate::skills::skill::Skill;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Entity {
     pub name: String,
     pub hp: i32,
@@ -9,6 +10,7 @@ pub struct Entity {
     pub armor: i32,
     pub attack_dmg: i32,
     pub magic_dmg: i32,
+    pub speed: i32,
     pub dodge_chance: f32,
     pub skills: Vec<Skill>,
     pub level: i32,
@@ -23,6 +25,7 @@ impl Entity {
         armor: i32,
         attack_dmg: i32,
         magic_dmg: i32,
+        speed: i32,
         dodge_chance: f32,
         skills: Vec<Skill>,
         level: i32,
@@ -35,6 +38,7 @@ impl Entity {
             armor,
             attack_dmg,
             magic_dmg,
+            speed,
             dodge_chance,
             skills,
             level,
