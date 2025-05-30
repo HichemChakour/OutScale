@@ -1,8 +1,8 @@
 use std::thread;
 use std::time::Duration;
-use rand::seq::SliceRandom;
+//use rand::seq::SliceRandom;
 use crate::entities::entity::HasEntity;
-use crate::outscale::EnnemiManager::EnnemiManager;
+use crate::outscale::ennemi_manager::EnnemiManager;
 use rand::Rng;
 
 pub struct CombatManager {
@@ -122,8 +122,8 @@ impl CombatManager {
                                 );
                                 match CombatManager::choose_target(&mut self.enemies) {
                                     Ok(target) => {
-                                        let mut rng = rand::thread_rng();
-                                        let dodge_roll: i32 = rng.gen_range(0..100);
+                                        let mut rng = rand::rng();
+                                        let dodge_roll: i32 = rng.random_range(0..100);
                                         if dodge_roll < target.entity().dodge_chance as i32 && !skill.for_allies {
                                             println!(
                                                 "\x1b[31m{}\x1b[0m à ésquivé ",

@@ -112,7 +112,7 @@ impl Skill {
         if self.attack_dmg > 0 || self.magic_dmg > 0 {
             let damage = self.calculate_damage(caster, target);
             let damage_taken = target.apply_damage(damage);
-            result.push_str(&format!("\x1b[34m{} \x1b[0m took \x1b[33m{}\x1b[0m damage\n", target.name, damage_taken));
+            result.push_str(&format!("\x1b[34m{}\x1b[0m a subbit \x1b[33m{}\x1b[0m point de dégat\n", target.name, damage_taken));
         }
 
         result

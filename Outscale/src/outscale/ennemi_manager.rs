@@ -1,5 +1,5 @@
 use rand::Rng;
-use rand::seq::{IndexedMutRandom, SliceRandom};
+use rand::seq::{IndexedMutRandom, /*SliceRandom*/};
 use crate::entities::entity::HasEntity;
 
 pub struct EnnemiManager;
@@ -11,7 +11,7 @@ impl EnnemiManager {
         enemies: &mut Vec<Box<dyn HasEntity>>,
     ) {
 
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         // Filtrer les compétences utilisables (suffisamment de mana)
         let usable_skills: Vec<_> = enemy
@@ -38,7 +38,7 @@ impl EnnemiManager {
         }
 
         // Choisir une compétence aléatoire parmi celles utilisables
-        let skill = usable_skills[rng.gen_range(0..usable_skills.len())].clone();
+        let skill = usable_skills[rng.random_range(0..usable_skills.len())].clone();
 
         // Déterminer la cible en fonction de la compétence
         let target_pool = if !skill.for_allies { allies } else { enemies };

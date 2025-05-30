@@ -1,10 +1,10 @@
-use colored::*;
+/*use colored::*;
 use std::fs;
 use std::io::{self, Write};
-use std::path::Path;
+use std::path::Path;*/
 
 // Fonction qui applique les styles aux balises du texte
-fn apply_styles(text: &str) -> String {
+/*fn apply_styles(text: &str) -> String {
     // Liste des styles avec leurs balises et styles correspondants
     let styles = vec![
         ("[italique]", "\x1b[3m", "[/italique]", "\x1b[0m"),
@@ -22,10 +22,10 @@ fn apply_styles(text: &str) -> String {
     }
 
     styled_text
-}
+}*/
 
 // Fonction qui demande une entrée à l'utilisateur
-pub fn demander_au_joueur(prompt: &str) -> String {
+/*pub fn demander_au_joueur(prompt: &str) -> String {
     print!("{}", prompt);
     io::stdout().flush().unwrap();
     let mut input = String::new();
@@ -33,10 +33,10 @@ pub fn demander_au_joueur(prompt: &str) -> String {
         .read_line(&mut input)
         .expect("Erreur de lecture");
     input.trim().to_string()
-}
+}*/
 
 // Fonction qui lit un fichier texte et applique les balises de style
-pub fn redaction_histoire(fichier: &str) {
+/*pub fn redaction_histoire(fichier: &str) {
     // Vérification de l'existence du fichier
     if !Path::new(fichier).exists() {
         eprintln!("Erreur : Le fichier spécifié n'existe pas : {}", fichier);
@@ -57,10 +57,10 @@ pub fn redaction_histoire(fichier: &str) {
 
     // Affichage du texte modifié
     println!("{}", sortie);
-}
+}*/
 
 // Test avec du texte statique
-pub fn redaction_histoire_test() {
+/*pub fn redaction_histoire_test() {
     println!("{}","ROOUUUUUGE".red());
 
-}
+}*/

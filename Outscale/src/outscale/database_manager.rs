@@ -1,15 +1,15 @@
-use rusqlite::{Connection, Result};
-use std::{fs, io};
+use rusqlite::{Connection,/* Result*/};
+/*use std::{fs, io};
 use std::path::Path;
 use crate::skills::inventaire::Inventaire;
-use crate::skills::object::Objet;
+use crate::skills::object::Objet;*/
+#[allow(dead_code)]
 pub struct DatabaseManager {
     pub(crate) conn: Connection,
 }
-
 impl DatabaseManager {
 
-    pub fn execute_sql_file(&self, sql_file_path: &str) -> Result<()> {
+    /*pub fn execute_sql_file(&self, sql_file_path: &str) -> Result<()> {
         // Lire le contenu du fichier SQL
         let sql_content = fs::read_to_string(sql_file_path)
             .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
@@ -17,24 +17,24 @@ impl DatabaseManager {
         // Exécuter le contenu du fichier SQL
         self.conn.execute_batch(&sql_content)?;
         Ok(())
-    }
+    }*/
 
-    pub fn new(db_path: &str) -> Result<Self> {
+   /* pub fn new(db_path: &str) -> Result<Self> {
         let conn = Connection::open(db_path)?;
         Ok(Self { conn })
-    }
+    }*/
 
-    pub fn file_exists(db_path: &str) -> bool {
+    /*pub fn file_exists(db_path: &str) -> bool {
         Path::new(db_path).exists()
-    }
+    }*/
 
-    pub fn has_player_data(&self) -> Result<bool> {
+   /* pub fn has_player_data(&self) -> Result<bool> {
         let query = "SELECT COUNT(*) FROM player";
         let count: i64 = self.conn.query_row(query, [], |row| row.get(0))?;
         Ok(count > 0)
-    }
+    }*/
 
-    pub fn insert_player(&self) -> Result<(), Box<dyn std::error::Error>> {
+    /*pub fn insert_player(&self) -> Result<(), Box<dyn std::error::Error>> {
         let mut nom = String::new();
         println!("Entrez votre nom :");
         io::stdin().read_line(&mut nom)?;
@@ -44,15 +44,15 @@ impl DatabaseManager {
             &[nom],
         )?;
         Ok(())
-    }
+    }*/
 
-    pub fn get_player_inventory_id(&self) -> Result<i32> {
+    /*pub fn get_player_inventory_id(&self) -> Result<i32> {
         let query = "SELECT inventaire_id FROM player";
         let id: i32 = self.conn.query_row(query, [], |row| row.get(0))?;
         Ok(id)
-    }
+    }*/
 
-    pub fn get_objet_by_id(&self, id: i32) -> Result<Objet> {
+    /*pub fn get_objet_by_id(&self, id: i32) -> Result<Objet> {
         let query = "SELECT id, inventaire_id, nom, degats, degats_magiques, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet
                      FROM objet WHERE id = ?1";
         self.conn.query_row(query, [id], |row| {
@@ -71,8 +71,8 @@ impl DatabaseManager {
                 type_objet: row.get(11)?,
             })
         })
-    }
-    pub fn get_player_inventory(&self) -> Result<Inventaire> {
+    }*/
+    /*pub fn get_player_inventory(&self) -> Result<Inventaire> {
         let id_inventaire = self.get_player_inventory_id()?;
 
         // Récupérer les IDs des objets spécifiques pour les emplacements
@@ -138,9 +138,9 @@ impl DatabaseManager {
             main2,
             liste_objets,
         })
-    }
+    }*/
 
-    pub fn get_inventaire_by_id_entity(&self, id_entity: i32) -> Result<Inventaire> {
+    /*pub fn get_inventaire_by_id_entity(&self, id_entity: i32) -> Result<Inventaire> {
         // Récupérer l'ID de l'inventaire associé à l'entité
         let query = "SELECT id, equipement_tete, equipement_torse, equipement_jambe, main1, main2
                  FROM inventaire WHERE entite_id = ?1";
@@ -205,7 +205,7 @@ impl DatabaseManager {
             main2,
             liste_objets,
         })
-    }
+    }*/
 
 
 }

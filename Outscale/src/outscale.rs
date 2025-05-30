@@ -1,23 +1,23 @@
-use rusqlite::{params, Connection, Result};
-use std::path::Path;
+/*use rusqlite::{params, Connection, Result};
+use std::path::Path;*/
 pub(crate) mod database_manager;
 mod init_tables;
 mod cli_manager;
 mod combat_manager;
-mod EnnemiManager;
+mod ennemi_manager;
 
-use std::env;
+//use std::env;
 use crate::entities::entity::{Entity, HasEntity};
 use crate::outscale::combat_manager::CombatManager;
-use crate::skills::inventaire::Inventaire;
+// crate::skills::inventaire::Inventaire;
 
-const RESOURCE_DIR: &str = "src/resources";
-const DB_PATH: &str = "src/save.db";
+// const RESOURCE_DIR: &str = "src/resources";
+// const DB_PATH: &str = "src/save.db";
 
-pub fn get_db_path() -> String {
+/*pub fn get_db_path() -> String {
     let current_dir = env::current_dir().unwrap();
     format!("{}/src/save.db", current_dir.display())
-}
+}*/
 
 pub fn run() {
 
@@ -62,12 +62,12 @@ pub fn run() {
         }
     }*/
 
-    testCombat();
+    test_combat();
     return;
 }
 
 
-pub fn testCombat(){
+pub fn test_combat(){
     let boule_de_feu = crate::skills::skill::Skill::new(
         "Boule de Feu".to_string(),
         0, 10, 0, 0, 0, 0, 0, 20, 0, 30, 0, false,
@@ -116,6 +116,6 @@ pub fn testCombat(){
     }
 
 }
-pub fn lancement_mode_histoire() {
+/*pub fn lancement_mode_histoire() {
    cli_manager::redaction_histoire(&*(RESOURCE_DIR.to_owned() + "/dialogue/Introduction.txt"));
-}
+}*/

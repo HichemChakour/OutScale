@@ -1,4 +1,4 @@
-use crate::skills::inventaire::Inventaire;
+//use crate::skills::inventaire::Inventaire;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Objet {
