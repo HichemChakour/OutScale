@@ -74,13 +74,13 @@ impl Skill {
         // Soins
         target.hp += self.hp_refound;
         if self.hp_refound > 0 {
-            result.push_str(&format!("{} healed for {} HP.\n", target.name, self.hp_refound));
+            result.push_str(&format!(" \x1b[31m{} \x1b[0m healed for \x1b[32m{}\x1b[0m HP.\n", target.name, self.hp_refound));
         }
 
         // Restauration de mana
         if self.mana_refound > 0 {
             caster.mana += self.mana_refound;
-            result.push_str(&format!("{} restored {} mana.\n", caster.name, self.mana_refound));
+            result.push_str(&format!("\x1b[31m{} \x1b[0m restored \x1b[32m{}\x1b[0m mana.\n", caster.name, self.mana_refound));
         }
 
         // Buffs et debuffs
@@ -90,29 +90,29 @@ impl Skill {
         target.magic_dmg += self.magic_dmg_buff;
 
         if self.magic_resist_buff > 0 {
-            result.push_str(&format!("{} gained {} magic resist.\n", target.name, self.magic_resist_buff));
+            result.push_str(&format!("\x1b[34m{} \x1b[0m gained \x1b[32m{}\x1b[0m magic resist.\n", target.name, self.magic_resist_buff));
         }
         if self.magic_resist_debuff > 0 {
-            result.push_str(&format!("{} lost {} magic resist.\n", target.name, self.magic_resist_debuff));
+            result.push_str(&format!("\x1b[34m{} \x1b[0m lost \x1b[32m{}\x1b[0m magic resist.\n", target.name, self.magic_resist_debuff));
         }
         if self.armor_buff > 0 {
-            result.push_str(&format!("{} gained {} armor.\n", target.name, self.armor_buff));
+            result.push_str(&format!("\x1b[34m{} \x1b[0m gained \x1b[32m{}\x1b[0m armor.\n", target.name, self.armor_buff));
         }
         if self.armor_debuff > 0 {
-            result.push_str(&format!("{} lost {} armor.\n", target.name, self.armor_debuff));
+            result.push_str(&format!("\x1b[34m{} \x1b[0m lost \x1b[32m{}\x1b[0m armor.\n", target.name, self.armor_debuff));
         }
         if self.attack_dmg_buff > 0 {
-            result.push_str(&format!("{} gained {} attack damage.\n", target.name, self.attack_dmg_buff));
+            result.push_str(&format!("\x1b[34m{} \x1b[0m gained \x1b[32m{}\x1b[0m attack damage.\n", target.name, self.attack_dmg_buff));
         }
         if self.magic_dmg_buff > 0 {
-            result.push_str(&format!("{} gained {} magic damage.\n", target.name, self.magic_dmg_buff));
+            result.push_str(&format!("\x1b[34m{} \x1b[0m gained \x1b[32m{}\x1b[0m magic damage.\n", target.name, self.magic_dmg_buff));
         }
 
         // Calcul des dégâts
         if self.attack_dmg > 0 || self.magic_dmg > 0 {
             let damage = self.calculate_damage(caster, target);
             let damage_taken = target.apply_damage(damage);
-            result.push_str(&format!("{} took {} damage!\n", target.name, damage_taken));
+            result.push_str(&format!("\x1b[34m{} \x1b[0m took \x1b[33m{}\x1b[0m damage\n", target.name, damage_taken));
         }
 
         result

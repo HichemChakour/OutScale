@@ -60,7 +60,7 @@ impl CombatManager {
     }
 
     fn player_turn(&mut self, mut player: Box<dyn HasEntity>) {
-        println!("C'est au tour de {} de jouer !", player.entity().name);
+        println!("C'est au tour de  \x1b[34m{}\x1b[0m de jouer ", player.entity().name);
 
         'main_menu: loop {
             println!("Choisissez une action :");
@@ -74,13 +74,13 @@ impl CombatManager {
 
             match choice {
                 "1" => {
-                    println!("{} effectue une attaque de base !", player.entity().name);
+                    println!("\x1b[34m{}\x1b[0m effectue une attaque de base ", player.entity().name);
                     match CombatManager::choose_target(&mut self.enemies) {
                         Ok(target) => {
                             let damage = player.based_attack();
                             let damage_taken = target.entity_mut().apply_damage(damage);
                             println!(
-                                "{} inflige {} dégâts à {} !",
+                                "\x1b[34m{}\x1b[0m inflige \x1b[33m{}\x1b[0m dégâts à \x1b[31m{}!\x1b[0m",
                                 player.entity().name,
                                 damage_taken,
                                 target.entity().name
@@ -100,7 +100,7 @@ impl CombatManager {
 
                         let skills = player.entity().skills.clone(); // Clone pour éviter les problèmes d'emprunt
                         for (i, skill) in skills.iter().enumerate() {
-                            println!("{}. {}", i + 1, skill.name);
+                            println!("\x1b[33m{}\x1b[0m. \x1b[35m{}\x1b[0m", i + 1, skill.name);
                         }
 
                         let mut skill_choice = String::new();
@@ -114,9 +114,9 @@ impl CombatManager {
 
                         if let Ok(skill_index) = skill_choice.parse::<usize>() {
                             if skill_index > 0 && skill_index <= skills.len() {
-                                let skill = skills[skill_index - 1].clone(); // Cloner la compétence sélectionnée
+                                let skill = skills[skill_index - 1].clone();
                                 println!(
-                                    "{} utilise la compétence {} !",
+                                    "\x1b[34m{}\x1b[0m utilise la compétence \x1b[35m{}\x1b[0m ",
                                     player.entity().name,
                                     skill.name
                                 );
@@ -126,12 +126,12 @@ impl CombatManager {
                                         let dodge_roll: i32 = rng.gen_range(0..100);
                                         if dodge_roll < target.entity().dodge_chance as i32 && !skill.for_allies {
                                             println!(
-                                                "{} à ésquivé !",
+                                                "\x1b[31m{}\x1b[0m à ésquivé ",
                                                 target.entity().name
                                             );
                                         } else {
                                             let result = skill.apply_effects(player.entity_mut(), target.entity_mut());
-                                            println!("{}", result);
+                                            println!("\x1b[33m{}\x1b[0m", result);
                                         }
                                         break 'main_menu;
                                     }
@@ -153,7 +153,7 @@ impl CombatManager {
                 }
 
                 _ => {
-                    println!("Choix invalide !");
+                    println!("Choix invalide ");
                     continue;
                 }
             }
@@ -164,7 +164,7 @@ impl CombatManager {
         loop {
             println!("Choisissez une cible (ou tapez 'q' pour revenir) :");
             for (i, target) in targets.iter().enumerate() {
-                println!("{}. {}", i + 1, target.entity().name);
+                println!("\x1b[33m{}\x1b[0m. \x1b[31m{}\x1b[0m", i + 1, target.entity().name);
             }
 
             let mut target_choice = String::new();
@@ -181,12 +181,12 @@ impl CombatManager {
                 }
             }
 
-            println!("Choix invalide !");
+            println!("Choix invalide ");
         }
     }
 
     fn enemy_turn(&mut self, enemy: Box<dyn HasEntity>) {
-        println!("C'est au tour de {} (ennemi) de jouer !", enemy.entity().name);
+        println!("C'est au tour de \x1b[31m{}\x1b[0m de jouer ", enemy.entity().name);
 
         EnnemiManager::enemy_action(enemy, &mut self.allies, &mut self.enemies);
     }

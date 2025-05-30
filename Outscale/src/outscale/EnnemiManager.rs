@@ -28,7 +28,7 @@ impl EnnemiManager {
                 let damage = enemy.based_attack();
                 let damage_taken = target.entity_mut().apply_damage(damage);
                 println!(
-                    "{} effectue une attaque de base sur {}, infligeant {} dégâts !",
+                    "\x1b[31m{}\x1b[0m effectue une attaque de base sur \x1b[34m{}\x1b[0m, infligeant \x1b[33m{}\x1b[0m dégâts ",
                     enemy.entity().name,
                     target.entity().name,
                     damage_taken
@@ -49,7 +49,7 @@ impl EnnemiManager {
                 let dodge_roll: f32 = rng.random_range(0..100) as f32;
                 if dodge_roll < target.entity().dodge_chance {
                     println!(
-                        "{} tente d'utiliser la compétence {} sur {}, mais l'attaque est esquivée !",
+                        "\x1b[31m{}\x1b[0m tente d'utiliser la compétence \x1b[35m{}\x1b[0m sur \x1b[34m{}\x1b[0m, mais l'attaque est esquivée ",
                         enemy.entity().name,
                         skill.name,
                         target.entity().name
@@ -59,7 +59,7 @@ impl EnnemiManager {
                 else {
                     let result = skill.apply_effects(enemy.entity_mut(), target.entity_mut());
                     println!(
-                        "{} utilise la compétence {} sur {} !\n{}",
+                        "\x1b[31m{}\x1b[0m utilise la compétence \x1b[35m{}\x1b[0m sur \x1b[34m{}\x1b[0m \n{}",
                         enemy.entity().name,
                         skill.name,
                         target.entity().name,
@@ -70,7 +70,7 @@ impl EnnemiManager {
             else {
                 let result = skill.apply_effects(enemy.entity_mut(), target.entity_mut());
                 println!(
-                    "{} utilise la compétence {} sur {} !\n{}",
+                    "\x1b[31m{}\x1b[0m utilise la compétence \x1b[35m{}\x1b[0m sur \x1b[31m{}\x1b[0m \n{}",
                     enemy.entity().name,
                     skill.name,
                     target.entity().name,

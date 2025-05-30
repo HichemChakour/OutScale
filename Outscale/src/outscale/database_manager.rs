@@ -32,8 +32,7 @@ impl DatabaseManager {
         let query = "SELECT COUNT(*) FROM player";
         let count: i64 = self.conn.query_row(query, [], |row| row.get(0))?;
         Ok(count > 0)
-    }//
-    //
+    }
 
     pub fn insert_player(&self) -> Result<(), Box<dyn std::error::Error>> {
         let mut nom = String::new();
