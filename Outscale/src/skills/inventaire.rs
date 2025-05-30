@@ -32,7 +32,7 @@ impl Inventaire {
         }
     }
 
-    /*pub(crate) fn to_string(&self) -> String {
+    pub(crate) fn to_string(&self) -> String {
         format!(
             "Inventaire {{ id: {}, tete: {}, jambes: {}, torse: {}, main1: {}, main2: {} }}",
             self.id,
@@ -42,9 +42,9 @@ impl Inventaire {
             self.main1.nom,
             self.main2.nom
         )
-    }*/
-    /*pub(crate) fn to_string_liste_objet (&self) -> String {
+    }
+    pub(crate) fn to_string_liste_objet (&self) -> String {
         let objets_str: Vec<String> = self.liste_objets.iter().map(|o| o.nom.clone()).collect();
         format!("Liste des objets : {:?}", objets_str)
-    }*/
+    }
 }

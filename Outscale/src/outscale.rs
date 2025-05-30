@@ -2,26 +2,28 @@
 use std::path::Path;*/
 pub(crate) mod database_manager;
 mod init_tables;
-mod cli_manager;
+pub(crate) mod cli_manager;
 mod combat_manager;
 mod ennemi_manager;
 
+use std::env;
 //use std::env;
 use crate::entities::entity::{Entity, HasEntity};
 use crate::outscale::combat_manager::CombatManager;
-// crate::skills::inventaire::Inventaire;
 
-// const RESOURCE_DIR: &str = "src/resources";
-// const DB_PATH: &str = "src/save.db";
+use crate::skills::inventaire;
 
-/*pub fn get_db_path() -> String {
+const RESOURCE_DIR: &str = "src/resources";
+const DB_PATH: &str = "src/save.db";
+
+pub fn get_db_path() -> String {
     let current_dir = env::current_dir().unwrap();
     format!("{}/src/save.db", current_dir.display())
-}*/
+}
 
 pub fn run() {
-
-    /*if !database_manager::DatabaseManager::file_exists(DB_PATH) {
+    /*
+    if !database_manager::DatabaseManager::file_exists(DB_PATH) {
         println!("Le fichier save.db n'existe pas. Création d'une nouvelle partie...");
 
         let db_manager = database_manager::DatabaseManager::new(DB_PATH).unwrap();
@@ -62,7 +64,8 @@ pub fn run() {
         }
     }*/
 
-    test_combat();
+    //test_combat();
+    lancement_mode_histoire();
     return;
 }
 
@@ -116,6 +119,10 @@ pub fn test_combat(){
     }
 
 }
-/*pub fn lancement_mode_histoire() {
+pub fn lancement_mode_histoire() {
    cli_manager::redaction_histoire(&*(RESOURCE_DIR.to_owned() + "/dialogue/Introduction.txt"));
-}*/
+    cli_manager::menu_principal(
+        &database_manager::DatabaseManager::new(&get_db_path()).unwrap(),
+        "AvignAura",
+    );
+}

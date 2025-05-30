@@ -14,6 +14,8 @@ Drop TABLE IF EXISTS action;
 Drop TABLE IF EXISTS zone;
 Drop TABLE IF EXISTS entite;
 DROP TABLE IF EXISTS entity;
+DROP TABLE IF EXISTS carte;
+DROP TABLE IF EXISTS zones;
 DROP TRIGGER IF EXISTS after_insert_player;
 DROP TRIGGER IF EXISTS after_insert_ennemi;
 DROP TRIGGER IF EXISTS after_insert_shadow;
@@ -124,6 +126,12 @@ CREATE TABLE IF NOT EXISTS journal (
       date DATE DEFAULT (DATE('now'))
 );
 
+CREATE TABLE IF NOT EXISTS zones(
+    nom TEXT PRIMARY KEY,
+    description TEXT DEFAULT NULL,
+    visited BOOLEAN DEFAULT FALSE
+);
+
 -- Création des déclencheurs
 CREATE TRIGGER IF NOT EXISTS after_insert_player
 AFTER INSERT ON player
@@ -145,10 +153,17 @@ BEGIN
     UPDATE entity SET inventaire_id = (SELECT last_insert_rowid()) WHERE nom = NEW.nom;
 END;
 
-
-
 -- Insertion des classes
 INSERT INTO classe (nom) VALUES ('Guerrier');
 INSERT INTO classe (nom) VALUES ('Sorcier');
 INSERT INTO classe (nom) VALUES ('Rodeur');
 INSERT INTO classe (nom) VALUES ('Tank');
+
+
+--Insertion des zones
+
+INSERT INTO zones (nom, description) VALUES ('AvignAura', 'Ville normalement paisible, mais qui est actuellement attaquée par des créatures maléfiques.');
+INSERT INTO zones (nom, description) VALUES ('Rocher des Doms', 'Une forêt dense et sombre, peuplée de créatures mystérieuses et dangereuses.');
+INSERT INTO zones (nom, description) VALUES ('MontFavé', 'Top 7 des montagnes qui se sont fait djoufara par des dragons');
+INSERT INTO zones (nom, description) Values ('Shop', 'Boutique où les joueurs peuvent acheter et vendre des objets, des compétences et des équipements.');
+INSERT INTO zones (nom, description) VALUES ('Les Remparts', 'Zone de défense de la ville, Là ou des hordes de monstres arrivent en boucles');
