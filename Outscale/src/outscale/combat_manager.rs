@@ -67,6 +67,7 @@ impl CombatManager {
             println!("1. Attaque de base");
             println!("2. Utiliser une compétence");
             println!("3. Utiliser un objet");
+            println!("4. Voir les statistiques des entités");
 
             let mut choice = String::new();
             std::io::stdin().read_line(&mut choice).unwrap();
@@ -126,7 +127,7 @@ impl CombatManager {
                                         let dodge_roll: i32 = rng.random_range(0..100);
                                         if dodge_roll < target.entity().dodge_chance as i32 && !skill.for_allies {
                                             println!(
-                                                "\x1b[31m{}\x1b[0m à ésquivé ",
+                                                "\x1b[31m{}\x1b[0m a esquivé ",
                                                 target.entity().name
                                             );
                                         } else {
@@ -147,11 +148,113 @@ impl CombatManager {
                     }
                 }
 
-                "3" => {
-                    println!("Utiliser un objet n'est pas encore implémenté.");
-                    continue 'main_menu;
+               "3" => {
+                    println!("Quel objet voulez-vous utiliser ? (ou tapez 'q' pour revenir) :");
+                    println!("1. Potion de vie \x1b[32m(+65% PV max)\x1b[0m");
+                    println!("2. Potion de mana \x1b[34m(+65% Mana max)\x1b[0m");
+
+                    let mut obj_choice = String::new();
+                    std::io::stdin().read_line(&mut obj_choice).unwrap();
+                    let obj_choice = obj_choice.trim();
+
+                    if obj_choice.eq_ignore_ascii_case("q") {
+                        continue 'main_menu;
+                    }
+
+                    // Modifier directement l'entité
+                    match obj_choice {
+                        "1" => {
+                            let max_hp = player.entity().max_hp;
+                            let current_hp = player.entity().hp;
+                            let heal = ((max_hp as f32) * 0.65).round() as i32;
+                            let new_hp = (current_hp + heal).min(max_hp);
+
+                            // Appliquer la guérison
+                            player.entity_mut().hp = new_hp;
+
+                            // Mettre à jour l'entité dans le vecteur des alliés si nécessaire
+                            for ally in &mut self.allies {
+                                if ally.entity().name == player.entity().name {
+                                    ally.entity_mut().hp = new_hp;
+                                    break;
+                                }
+                            }
+
+                            println!("Vous récupérez {} PV (\x1b[32m{}/{}\x1b[0m)", heal, new_hp, max_hp);
+                            break 'main_menu;
+                        }
+                        "2" => {
+                            let max_mana = player.entity().max_mana;
+                            let current_mana = player.entity().mana;
+                            let mana_gain = ((max_mana as f32) * 0.65).round() as i32;
+                            let new_mana = (current_mana + mana_gain).min(max_mana);
+
+                            // Appliquer le gain de mana
+                            player.entity_mut().mana = new_mana;
+
+                            // Mettre à jour l'entité dans le vecteur des alliés si nécessaire
+                            for ally in &mut self.allies {
+                                if ally.entity().name == player.entity().name {
+                                    ally.entity_mut().mana = new_mana;
+                                    break;
+                                }
+                            }
+
+                            println!("Vous récupérez {} Mana (\x1b[34m{}/{}\x1b[0m)", mana_gain, new_mana, max_mana);
+                            break 'main_menu;
+                        }
+                        _ => {
+                            println!("Choix invalide !");
+                            continue 'main_menu;
+                        }
+                    }
                 }
 
+                "4" => {
+                    // Créer une liste combinée de toutes les entités
+                    let mut all_entities: Vec<(&str, &Box<dyn HasEntity>)> = Vec::new();
+                    all_entities.push(("Vous", &player));
+                    for ally in &self.allies {
+                        if ally.entity().name != player.entity().name {
+                            all_entities.push(("Allié", ally));
+                        }
+                    }
+                    for enemy in &self.enemies {
+                        all_entities.push(("Ennemi", enemy));
+                    }
+
+                    println!("Sélectionnez une entité pour voir ses statistiques (ou tapez 'q' pour revenir) :");
+                    for (i, (typ, ent)) in all_entities.iter().enumerate() {
+                        println!("{}. [{}] {}", i + 1, typ, ent.entity().name);
+                    }
+
+                    let mut stat_choice = String::new();
+                    std::io::stdin().read_line(&mut stat_choice).unwrap();
+                    let stat_choice = stat_choice.trim();
+
+                    if stat_choice.eq_ignore_ascii_case("q") {
+                        continue 'main_menu;
+                    }
+
+                    if let Ok(index) = stat_choice.parse::<usize>() {
+                        if index > 0 && index <= all_entities.len() {
+                           let (_typ, ent) = &all_entities[index - 1];
+                            let entity = ent.entity();
+                            println!("--- Statistiques de {} ---", entity.name);
+                            println!("PV: \x1b[32m{}\x1b[0m", entity.hp);
+                            println!("Mana: \x1b[32m{}\x1b[0m", entity.mana);
+                            println!("Attaque dmg: \x1b[32m{}\x1b[0m", entity.attack_dmg);
+                            println!("Dégâts magiques: \x1b[32m{}\x1b[0m", entity.magic_dmg);
+                            println!("Armure: \x1b[32m{}\x1b[0m", entity.armor);
+                            println!("Résistance magique: \x1b[32m{}\x1b[0m", entity.magic_resist);
+                        } else {
+                            println!("Choix invalide !");
+                        }
+                    } else {
+                        println!("Choix invalide !");
+                    }
+                    continue 'main_menu;
+                }
                 _ => {
                     println!("Choix invalide ");
                     continue;

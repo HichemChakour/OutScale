@@ -72,14 +72,20 @@ impl Skill {
         caster.mana -= self.mana_cost;
 
         // Soins
-        target.hp += self.hp_refound;
         if self.hp_refound > 0 {
+            target.hp += self.hp_refound;
+            if target.hp > target.max_hp {
+                target.hp = target.max_hp;
+            }
             result.push_str(&format!(" \x1b[31m{} \x1b[0m healed for \x1b[32m{}\x1b[0m HP.\n", target.name, self.hp_refound));
         }
 
         // Restauration de mana
         if self.mana_refound > 0 {
             caster.mana += self.mana_refound;
+            if caster.mana > caster.max_mana {
+                caster.mana = caster.max_mana;
+            }
             result.push_str(&format!("\x1b[31m{} \x1b[0m restored \x1b[32m{}\x1b[0m mana.\n", caster.name, self.mana_refound));
         }
 
