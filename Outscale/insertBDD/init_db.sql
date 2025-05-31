@@ -33,18 +33,16 @@ CREATE TABLE IF NOT EXISTS player (
     magic_damage INTEGER DEFAULT NULL,
     speed INTEGER DEFAULT NULL,
     dodge_chance FLOAT DEFAULT NULL,
-    inventaire_skills_id INTEGER DEFAULT NULL,
     inventaire_id INTEGER DEFAULT NULL,
     level INTEGER DEFAULT 1,
     xp INTEGER DEFAULT 0,
-    FOREIGN KEY(inventaire_skills_id) REFERENCES inventaire_skills(id),
     FOREIGN KEY(inventaire_id) REFERENCES inventaire(id)
 );
 
 
 CREATE TABLE IF NOT EXISTS entity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT DEFAULT NULL,
-    entity_id INTEGER PRIMARY KEY AUTOINCREMENT,
     enemy BOOLEAN DEFAULT NULL, --true = ennemi, false = shadow
     hp INTEGER DEFAULT NULL,
     mana INTEGER DEFAULT NULL,
@@ -54,13 +52,10 @@ CREATE TABLE IF NOT EXISTS entity (
     magic_damage INTEGER DEFAULT NULL,
     speed INTEGER DEFAULT NULL,
     dodge_chance FLOAT DEFAULT NULL,
-    liste_skills TEXT DEFAULT NULL,
     classe_id INTEGER NOT NULL,
-    inventaire_skills_id INTEGER DEFAULT NULL,
     inventaire_id INTEGER DEFAULT NULL,
     xp INTEGER DEFAULT 0,
     level INTEGER DEFAULT 1,
-    FOREIGN KEY(inventaire_skills_id) REFERENCES inventaire_skills(id),
     FOREIGN KEY(inventaire_id) REFERENCES inventaire(id)
 );
 
@@ -90,11 +85,6 @@ CREATE TABLE IF NOT EXISTS objet (
 );
 
 
-
-CREATE TABLE IF NOT EXISTS inventaire_skills (
-    id INTEGER PRIMARY KEY AUTOINCREMENT
-);
-
 CREATE TABLE IF NOT EXISTS classe (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT DEFAULT NULL
@@ -103,23 +93,22 @@ CREATE TABLE IF NOT EXISTS classe (
 -- table qui répertorie toutes les compétences de la bdd
 CREATE TABLE IF NOT EXISTS skills (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nom TEXT DEFAULT NULL,
-    desc_skill TEXT DEFAULT NULL,
-    degats INTEGER DEFAULT NULL,
-    armure INTEGER DEFAULT NULL,
-    taux_critique INTEGER DEFAULT NULL,
-    mana INTEGER DEFAULT NULL,
-    degats_magique INTEGER DEFAULT NULL,
-    magic_resist INTEGER DEFAULT NULL,
-    hp INTEGER DEFAULT NULL
-);
-
--- table qui répertorie toutes les compétences de acquises de tout les personnages de la bdd
-CREATE TABLE IF NOT EXISTS liste_skills (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    inventaire_skills_id INTEGER,
-    FOREIGN KEY(inventaire_skills_id) REFERENCES inventaire_skills(id),
-    FOREIGN KEY(id) REFERENCES skills(id)
+    name TEXT DEFAULT NULL,
+    description TEXT DEFAULT NULL,
+    hp_refound INTEGER DEFAULT NULL,
+    mana_cost INTEGER DEFAULT NULL,
+    mana_refound INTEGER DEFAULT NULL,
+    magic_resist_debuff INTEGER DEFAULT NULL,
+    magic_resist_buff INTEGER DEFAULT NULL,
+    armor_debuff INTEGER DEFAULT NULL,
+    armor_buff INTEGER DEFAULT NULL,
+    attack_dmg INTEGER DEFAULT NULL,
+    attack_dmg_buff INTEGER DEFAULT NULL,
+    magic_dmg INTEGER DEFAULT NULL,
+    magic_dmg_buff INTEGER DEFAULT NULL,
+    for_allies BOOLEAN DEFAULT FALSE, -- true = pour les alliés, false = pour l'entité
+    entity_id INTEGER DEFAULT NULL, -- ID de l'entité qui possède la compétence
+    player_id INTEGER DEFAULT NULL -- ID du joueur qui possède la compétence
 );
 
 CREATE TABLE IF NOT EXISTS journal (
@@ -139,8 +128,6 @@ CREATE TRIGGER IF NOT EXISTS after_insert_player
 AFTER INSERT ON player
 FOR EACH ROW
 BEGIN
-    INSERT INTO inventaire_skills (id) VALUES (NULL);
-    UPDATE player SET inventaire_skills_id = (SELECT last_insert_rowid()) WHERE id = NEW.id;
     INSERT INTO inventaire (entity_id) VALUES (NEW.id);
     UPDATE player SET inventaire_id = (SELECT last_insert_rowid()) WHERE id = NEW.id;
 END;
@@ -149,8 +136,6 @@ CREATE TRIGGER IF NOT EXISTS after_insert_entity
 AFTER INSERT ON entity
 FOR EACH ROW
 BEGIN
-    INSERT INTO inventaire_skills (id) VALUES (NULL);
-    UPDATE entity SET inventaire_skills_id = (SELECT last_insert_rowid()) WHERE nom = NEW.nom;
     INSERT INTO inventaire (entity_id) VALUES (NEW.inventaire_id);
     UPDATE entity SET inventaire_id = (SELECT last_insert_rowid()) WHERE nom = NEW.nom;
 END;
@@ -174,3 +159,6 @@ INSERT INTO zones (nom, description) VALUES ('Palais des Papes', 'Palais du Pape
 -- Insertion d'excaliburne
 INSERT INTO objet(nom, degats, armure, taux_critique, mana, vitesse, degats_magique, magic_resist, hp, type_objet) VALUES
         ('Excaliburne', 100, 0, 0, 0, 0, 0, 0, 0, 'arme');
+
+INSERT INTO entity(nom, enemy, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id) VALUES
+        ('RAVUS', 0, 1000, 0, 0, 0, 100, 0, 0, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'));

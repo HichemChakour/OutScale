@@ -23,6 +23,7 @@ pub struct Entity {
 
 impl Entity {
     pub fn new(
+        id: i32,
         name: String,
         max_hp: i32,
         hp: i32,
@@ -40,7 +41,7 @@ impl Entity {
         inventaire: Option<Inventaire>,
     ) -> Self {
         Entity {
-            id: 0,
+            id,
             name,
             max_hp,
             hp,
