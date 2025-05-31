@@ -5,6 +5,7 @@ mod init_tables;
 pub(crate) mod cli_manager;
 mod combat_manager;
 mod ennemi_manager;
+pub mod zone;
 
 use std::env;
 //use std::env;
@@ -85,7 +86,7 @@ pub fn test_combat(){
         "Soin".to_string(),
         20, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, true,
     );
-    let hero = Box::new(crate::entities::player::Player::new(Entity::new("Hero".to_string(), 500, 50, 10, 5, 20, 15, 10, 50.0, vec![boule_de_feu.clone(), coup_de_poing.clone()], 1, None))) as Box<dyn HasEntity>;
+    let hero = Box::new(crate::entities::player::Player::new(Entity::new("Hero".to_string(), 500, 50, 10, 5, 20, 15, 10, 50.0, vec![boule_de_feu.clone(), coup_de_poing.clone()], 1, None), None)) as Box<dyn HasEntity>;
 
     let enemy1 = Box::new(crate::entities::enemy::Enemy::new(Entity::new(
         "Enemy1".to_string(),

@@ -1,11 +1,10 @@
-/*use colored::*;
+use colored::*;
 use std::fs;
 use std::io::{self, Write};
-use std::path::Path;*/
-use std::{fs, io};
-use std::io::Write;
 use std::path::Path;
+use crate::entities::player::Player;
 use crate::outscale::database_manager::DatabaseManager;
+use crate::outscale::zone::*;
 
 // Fonction qui applique les styles aux balises du texte
 fn apply_styles(text: &str) -> String {
@@ -99,23 +98,29 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str) {
                 indice();
             },
             "MontFavé" => {
-                deplacement_mont_fave(db_manager);
+                deplacement_zone(db_manager, "MontFavé");
+                menu_principal(db_manager, "MontFavé");
             }
             "Rocher des Doms" => {
-                println!("Vous vous déplacez au Rocher des Doms");
+                deplacement_zone(db_manager, "Rocher des Doms");
                 menu_principal(db_manager, "Rocher des Doms");
             }
             "Les Remparts" => {
-                println!("Vous vous déplacez aux Remparts");
+                deplacement_zone(db_manager, "Les Remparts");
                 menu_principal(db_manager, "Les Remparts");
             }
             "AvignAura" => {
-                println!("Vous vous déplacez à AvignAura");
+                deplacement_zone(db_manager, "AvignAura");
                 menu_principal(db_manager, "AvignAura");
+            }
+            "Palais des Papes" => {
+                deplacement_zone(db_manager, "Palais des Papes");
+                menu_principal(db_manager, "Palais des Papes");
             }
             "q" => {
                 println!("Quitter le jeu...");
-                println!("Sauvegarde de vos inventaires...");
+                println!("Sauvegarde en cours ...");
+                sauvegarde(db_manager);
                 break;
             }
             _ => {
@@ -131,10 +136,10 @@ fn indice() {
     println!("Ps encore fait");
 }
 
-fn deplacement_mont_fave(db_manager: &DatabaseManager) {
-    db_manager.visite_lieu("MontFavé");
-    println!("Vous vous déplacez au MontFavé");
+fn sauvegarde(db_manager: &DatabaseManager, player : Player) {
+    db_manager.sauvegarde(player);
 }
+
 
 fn afficher_lieux_visites(db_manager: &DatabaseManager) {
     let zones_visitees = db_manager.get_visited_zones();

@@ -167,3 +167,4 @@ INSERT INTO zones (nom, description) VALUES ('Rocher des Doms', 'Une forêt dens
 INSERT INTO zones (nom, description) VALUES ('MontFavé', 'Top 7 des montagnes qui se sont fait djoufara par des dragons');
 INSERT INTO zones (nom, description) Values ('Shop', 'Boutique où les joueurs peuvent acheter et vendre des objets, des compétences et des équipements.');
 INSERT INTO zones (nom, description) VALUES ('Les Remparts', 'Zone de défense de la ville, Là ou des hordes de monstres arrivent en boucles');
+INSERT INTO zones (nom, description) VALUES ('Palais des Papes', 'Palais du Pape corrompu');

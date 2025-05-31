@@ -1,6 +1,7 @@
 use rusqlite::{Connection, Result};
 use std::{fs, io};
 use std::path::Path;
+use crate::entities::player::Player;
 use crate::skills::inventaire::Inventaire;
 use crate::skills::object::Objet;
 #[allow(dead_code)]
@@ -250,5 +251,9 @@ impl DatabaseManager {
             },
             Some(i32::MIN..=-1_i32) | Some(2_i32..=i32::MAX) => todo!()
         }
+    }
+
+    pub fn sauvegarde(&self, player : Player){
+
     }
 }
