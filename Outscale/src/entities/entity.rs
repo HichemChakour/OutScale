@@ -3,6 +3,7 @@ use crate::skills::skill::Skill;
 use crate::skills::inventaire::Inventaire;
 #[derive(Debug, PartialEq, Clone)]
 pub struct Entity {
+    pub id : i32,
     pub name: String,
     pub max_hp: i32,
     pub hp: i32,
@@ -16,6 +17,7 @@ pub struct Entity {
     pub dodge_chance: f32,
     pub skills: Vec<Skill>,
     pub level: i32,
+    pub xp: i32,
     pub inventaire: Option<Inventaire>
 }
 
@@ -34,9 +36,11 @@ impl Entity {
         dodge_chance: f32,
         skills: Vec<Skill>,
         level: i32,
+        xp: i32,
         inventaire: Option<Inventaire>,
     ) -> Self {
         Entity {
+            id: 0,
             name,
             max_hp,
             hp,
@@ -50,6 +54,7 @@ impl Entity {
             dodge_chance,
             skills,
             level,
+            xp,
             inventaire
         }
     }

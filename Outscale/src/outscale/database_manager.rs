@@ -2,6 +2,7 @@ use rusqlite::{Connection, Result};
 use std::{fs, io};
 use std::path::Path;
 use crate::entities::player::Player;
+use crate::entities::shadow::Shadow;
 use crate::skills::inventaire::Inventaire;
 use crate::skills::object::Objet;
 #[allow(dead_code)]
@@ -253,7 +254,163 @@ impl DatabaseManager {
         }
     }
 
-    pub fn sauvegarde(&self, player : Player){
 
+    // Correction pour la méthode sauvegarde dans DatabaseManager
+    pub fn sauvegarde(&self, player: Player) {
+        Self::update_player(&self.conn, &player);
+
+        let mut tout_les_objets: Vec<Objet> = vec![];
+        if let Some(inventaire) = &player.entity.inventaire {
+            for objet in &inventaire.liste_objets {
+                tout_les_objets.push(objet.clone());
+            }
+        }
+
+        if let Some(ombre) = &player.ombres {
+            Self::sauvegarde_ombre(&self.conn, ombre.clone());
+            if let Some(inventaire) = &ombre.entity.inventaire {
+                for objet in &inventaire.liste_objets {
+                    tout_les_objets.push(objet.clone());
+                }
+            }
+        }
+
+        let mut objets_a_inserer : Vec<Objet> = vec![];
+        let mut objets_a_modifier : Vec<Objet> = vec![];
+        let mut objets_a_supprimer : Vec<Objet> = vec![];
+
+        for objet in tout_les_objets {
+            if objet.id == 0 {
+                objets_a_inserer.push(objet);
+            } else if objet.id == -1 {
+                objets_a_supprimer.push(objet);
+            } else {
+                objets_a_modifier.push(objet);
+            }
+        }
+
+        // Insertion des nouveaux objets
+        for objet in objets_a_inserer {
+            self.conn.execute(
+                "INSERT INTO objet (inventaire_id, nom, degats, degats_magiques, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+                rusqlite::params![
+                objet.inventaire_id,
+                objet.nom,
+                objet.degats,
+                objet.degats_magiques,
+                objet.armure,
+                objet.magic_resist,
+                objet.mana,
+                objet.taux_critique as i32,
+                objet.vitesse,
+                objet.hp,
+                objet.type_objet
+            ],
+            ).expect("Erreur lors de l'insertion d'un nouvel objet dans la base de données");
+        }
+
+        for objet in objets_a_modifier {
+            Self::sauvegarde_modification_objet(&self.conn, objet);
+        }
+
+        for objet in objets_a_supprimer {
+            Self::delete_objet(&self.conn, objet.id);
+        }
+    }
+
+    // Correction pour la méthode sauvegarde_modification_objet
+    fn sauvegarde_modification_objet(conn: &Connection, objet: Objet) {
+        conn.execute(
+            "UPDATE objet SET inventaire_id = ?1, nom = ?2, degats = ?3, degats_magiques = ?4, armure = ?5, magic_resist = ?6, mana = ?7, taux_critique = ?8, vitesse = ?9, hp = ?10, type_objet = ?11 WHERE id = ?12",
+            rusqlite::params![
+            objet.inventaire_id,
+            objet.nom,
+            objet.degats,
+            objet.degats_magiques,
+            objet.armure,
+            objet.magic_resist,
+            objet.mana,
+            objet.taux_critique as i32,
+            objet.vitesse,
+            objet.hp,
+            objet.type_objet,
+            objet.id
+        ],
+        ).expect("Erreur lors de la sauvegarde de l'objet dans la base de données");
+    }
+
+    // Correction pour la méthode update_player
+    fn update_player(conn: &Connection, player: &Player) {
+        conn.execute(
+            "UPDATE player SET hp = ?1, mana = ?2, magic_resist = ?3, armor = ?4, attack_damage = ?5, magic_damage = ?6, speed = ?7, dodge_chance = ?8, level = ?9, xp = ?10 WHERE nom = ?11",
+            rusqlite::params![
+            player.entity.hp,
+            player.entity.mana,
+            player.entity.magic_resist,
+            player.entity.armor,
+            player.entity.attack_dmg,
+            player.entity.magic_dmg,
+            player.entity.speed,
+            player.entity.dodge_chance as i32,
+            player.entity.level,
+            player.entity.xp,
+            player.entity.name
+        ],
+        ).expect("Erreur lors de la mise à jour du joueur dans la base de données");
+
+        if let Some(inventaire) = &player.entity.inventaire {
+            conn.execute(
+                "UPDATE inventaire SET equipement_tete = ?1, equipement_torse = ?2, equipement_jambe = ?3, main1 = ?4, main2 = ?5 WHERE id = ?6",
+                rusqlite::params![
+                inventaire.tete.id,
+                inventaire.torse.id,
+                inventaire.jambes.id,
+                inventaire.main1.id,
+                inventaire.main2.id,
+                inventaire.id
+            ],
+            ).expect("Erreur lors de la sauvegarde de l'inventaire du joueur dans la base de données");
+        }
+    }
+
+    fn delete_objet(conn: &Connection, id_objet: i32) {
+        conn.execute(
+            "DELETE FROM objet WHERE id = ?1",
+            rusqlite::params![id_objet],
+        ).expect("Erreur lors de la suppression de l'objet dans la base de données");
+    }
+
+    fn sauvegarde_ombre(conn: &Connection, ombre: Shadow) {
+        conn.execute(
+            "UPDATE shadow SET hp = ?1, mana = ?2, magic_resist = ?3, armor = ?4, attack_damage = ?5, magic_damage = ?6, speed = ?7, dodge_chance = ?8, level = ?9, xp = ?10 WHERE nom = ?11",
+            rusqlite::params![
+                ombre.entity.hp,
+                ombre.entity.mana,
+                ombre.entity.magic_resist,
+                ombre.entity.armor,
+                ombre.entity.attack_dmg,
+                ombre.entity.magic_dmg,
+                ombre.entity.speed,
+                ombre.entity.dodge_chance as i32,
+                ombre.entity.level,
+                ombre.entity.xp,
+                ombre.entity.name
+            ],
+        ).expect("Erreur lors de la mise à jour de l'ombre dans la base de données");
+
+        if let Some(inventaire) = &ombre.entity.inventaire {
+            conn.execute(
+                "UPDATE inventaire SET equipement_tete = ?1, equipement_torse = ?2, equipement_jambe = ?3, main1 = ?4, main2 = ?5 WHERE id = ?6",
+                rusqlite::params![
+                    inventaire.tete.id,
+                    inventaire.torse.id,
+                    inventaire.jambes.id,
+                    inventaire.main1.id,
+                    inventaire.main2.id,
+                    inventaire.id
+                ],
+            ).expect("Erreur lors de la sauvegarde de l'inventaire de l'ombre dans la base de données");
+        }
     }
 }

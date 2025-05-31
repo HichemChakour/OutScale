@@ -66,7 +66,7 @@ pub fn redaction_histoire(fichier: &str) {
 pub fn redaction_histoire_test() {
 
 }
-pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str) {
+pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player: &mut Player) {
     println!("Vous êtes actuellement dans la zone : {}. Que comptez vous faire ?", zone_actuelle);
     println!("i. Ouvrir l'inventaire de vos personnages");
     println!("j. Ouvrir le journal");
@@ -92,35 +92,35 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str) {
             "c" => {
                 println!("Affichage des lieux visités...");
                 afficher_lieux_visites(db_manager);
-                menu_principal(db_manager, zone_actuelle);
+                menu_principal(db_manager, zone_actuelle, player);
             },
             "indice" => {println!("Voici un indice...");
                 indice();
             },
             "MontFavé" => {
                 deplacement_zone(db_manager, "MontFavé");
-                menu_principal(db_manager, "MontFavé");
+                menu_principal(db_manager, "MontFavé", player);
             }
             "Rocher des Doms" => {
                 deplacement_zone(db_manager, "Rocher des Doms");
-                menu_principal(db_manager, "Rocher des Doms");
+                menu_principal(db_manager, "Rocher des Doms", player);
             }
             "Les Remparts" => {
                 deplacement_zone(db_manager, "Les Remparts");
-                menu_principal(db_manager, "Les Remparts");
+                menu_principal(db_manager, "Les Remparts", player);
             }
             "AvignAura" => {
                 deplacement_zone(db_manager, "AvignAura");
-                menu_principal(db_manager, "AvignAura");
+                menu_principal(db_manager, "AvignAura", player);
             }
             "Palais des Papes" => {
                 deplacement_zone(db_manager, "Palais des Papes");
-                menu_principal(db_manager, "Palais des Papes");
+                menu_principal(db_manager, "Palais des Papes", player);
             }
             "q" => {
                 println!("Quitter le jeu...");
                 println!("Sauvegarde en cours ...");
-                sauvegarde(db_manager);
+                sauvegarde(db_manager, player.clone());
                 break;
             }
             _ => {

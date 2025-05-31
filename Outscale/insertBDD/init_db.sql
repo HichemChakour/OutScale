@@ -32,9 +32,11 @@ CREATE TABLE IF NOT EXISTS player (
     attack_damage INTEGER DEFAULT NULL,
     magic_damage INTEGER DEFAULT NULL,
     speed INTEGER DEFAULT NULL,
-    dodge_chance INTEGER DEFAULT NULL,
+    dodge_chance FLOAT DEFAULT NULL,
     inventaire_skills_id INTEGER DEFAULT NULL,
     inventaire_id INTEGER DEFAULT NULL,
+    level INTEGER DEFAULT 1,
+    xp INTEGER DEFAULT 0,
     FOREIGN KEY(inventaire_skills_id) REFERENCES inventaire_skills(id),
     FOREIGN KEY(inventaire_id) REFERENCES inventaire(id)
 );
@@ -51,12 +53,13 @@ CREATE TABLE IF NOT EXISTS entity (
     attack_damage INTEGER DEFAULT NULL,
     magic_damage INTEGER DEFAULT NULL,
     speed INTEGER DEFAULT NULL,
-    dodge_chance INTEGER DEFAULT NULL,
+    dodge_chance FLOAT DEFAULT NULL,
     liste_skills TEXT DEFAULT NULL,
     classe_id INTEGER NOT NULL,
     inventaire_skills_id INTEGER DEFAULT NULL,
     inventaire_id INTEGER DEFAULT NULL,
-    FOREIGN KEY(classe_id) REFERENCES classe(classe_id),
+    xp INTEGER DEFAULT 0,
+    level INTEGER DEFAULT 1,
     FOREIGN KEY(inventaire_skills_id) REFERENCES inventaire_skills(id),
     FOREIGN KEY(inventaire_id) REFERENCES inventaire(id)
 );
@@ -168,3 +171,7 @@ INSERT INTO zones (nom, description) VALUES ('MontFavé', 'Top 7 des montagnes q
 INSERT INTO zones (nom, description) Values ('Shop', 'Boutique où les joueurs peuvent acheter et vendre des objets, des compétences et des équipements.');
 INSERT INTO zones (nom, description) VALUES ('Les Remparts', 'Zone de défense de la ville, Là ou des hordes de monstres arrivent en boucles');
 INSERT INTO zones (nom, description) VALUES ('Palais des Papes', 'Palais du Pape corrompu');
+
+-- Insertion d'excaliburne
+INSERT INTO objet(nom, degats, armure, taux_critique, mana, vitesse, degats_magique, magic_resist, hp, type_objet) VALUES
+        ('Excaliburne', 100, 0, 0, 0, 0, 0, 0, 0, 'arme');
