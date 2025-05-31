@@ -12,9 +12,11 @@ use std::env;
 use crate::entities::entity::{Entity, HasEntity};
 use crate::entities::player;
 use crate::entities::player::Player;
+use crate::entities::shadow::Shadow;
 use crate::outscale::combat_manager::CombatManager;
 
 use crate::skills::inventaire;
+use crate::skills::skill::Skill;
 
 const RESOURCE_DIR: &str = "src/resources";
 const DB_PATH: &str = "src/save.db";
@@ -51,14 +53,14 @@ pub fn run() {
         Ok(true) => {
             println!("Une partie existante a été trouvée. Chargement...");
             player = db_manager.get_player_data();
-            lancement_mode_histoire();
+            //lancement_mode_histoire();
         }
         Ok(false) => {
             if let Err(e) = db_manager.insert_player() {
                 eprintln!("Erreur lors de l'insertion du joueur : {}", e);
                 return;
             } else {
-                println!("Joueur inséré avec succès !");
+                player = db_manager.get_player_data();
             }
         }
         Err(e) => {
@@ -67,61 +69,42 @@ pub fn run() {
         }
     }
 
-    lancement_mode_histoire();
+    //lancement_mode_histoire();
+    test_skills(&mut player);
+    db_manager.sauvegarde(player);
+    let mut player2 = db_manager.get_player_data();
+    test_recup_skills(&mut player2);
     return;
 }
 
-
-pub fn test_combat(){
-    let boule_de_feu = crate::skills::skill::Skill::new(
-        "Boule de Feu".to_string(),
-        0, 10, 0, 0, 0, 0, 0, 20, 0, 30, 0, false,
-    );
-
-    let coup_de_poing = crate::skills::skill::Skill::new(
-        "Coup de Poing".to_string(),
-        0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, false,
-    );
-
-    let heal = crate::skills::skill::Skill::new(
-        "Soin".to_string(),
-        20, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, true,
-    );
-  
-    let hero = Box::new(crate::entities::player::Player::new(Entity::new("Hero".to_string(), 500, 50, 10, 5, 20, 15, 10, 50.0 as i32, 0,1.20,vec![boule_de_feu.clone(), coup_de_poing.clone()], 1, 0,None), None)) as Box<dyn HasEntity>;
-
-    let enemy1 = Box::new(crate::entities::enemy::Enemy::new(Entity::new(
-        "Enemy1".to_string(),
-        80,80, 30,30, 8, 4, 15, 10, 12, 10.0,
-        vec![boule_de_feu.clone(), coup_de_poing.clone()],
-        1,0,None
-    ))) as Box<dyn HasEntity>;
-
-    let enemy2 = Box::new(crate::entities::enemy::Enemy::new(Entity::new(
-        "Enemy2".to_string(),
-        90, 90, 40,40, 9, 6, 18, 12, 11, 10.0,
-        vec![heal.clone()],
-        1,0,None
-    ))) as Box<dyn HasEntity>;
-
-    let mut combat_manager = CombatManager::new(vec![hero], vec![enemy1, enemy2]);
-
-    println!("Le combat commence !");
-    while !combat_manager.allies.is_empty() && !combat_manager.enemies.is_empty() {
-        combat_manager.next_turn();
-
-        // Vérifier si un camp a été vaincu
-        combat_manager.allies.retain(|ally| ally.entity().hp > 0);
-        combat_manager.enemies.retain(|enemy| enemy.entity().hp > 0);
-    }
-
-    if combat_manager.allies.is_empty() {
-        println!("Les ennemis ont gagné !");
-    } else {
-        println!("Les alliés ont gagné !");
-    }
-
-}
 pub fn lancement_mode_histoire() {
    cli_manager::redaction_histoire(&*(RESOURCE_DIR.to_owned() + "/dialogue/Introduction.txt"));
+}
+
+pub fn test_skills(player: &mut Player) {
+    let skill1 = Skill::new(0, "Coup de Poing".parse().unwrap(), "Inflige des dégâts physiques à l'ennemi.".parse().unwrap(), 0, 10, 0, 0, 0, 0, 5, 0, 0, i32::from(false), 1, false, -1);
+    let skill2 = Skill::new(0,"GROS COUP DE BITE".parse().unwrap(), "Inflige des dégâts physiques à l'ennemi.".parse().unwrap(), 0, 10, 0, 0, 0, 0, 5, 0, 0, i32::from(false), 1, false, -1);
+    let mut skill3 = skill2.clone();
+    skill3.entity_id=1;
+    player.entity.skills.push(skill1);
+    player.entity.skills.push(skill2);
+    player.ombres[0].entity.skills.push(skill3);
+
+}
+
+pub fn test_recup_skills(player: &mut Player) {
+    println!("Affichage des compétences du joueur :");
+    for skill in &player.entity.skills {
+        println!("ID: {}, Nom: {}, Description: {}, Coût en mana: {}, Dégâts physiques: {}, Dégâts magiques: {}",
+            skill.id, skill.name, skill.description, skill.mana_cost, skill.attack_dmg, skill.magic_dmg);
+    }
+
+    println!("AFfichage des compétences des ombres :");
+    for shadow in &player.ombres {
+        println!("Ombre: {}", shadow.entity.name);
+        for skill in &shadow.entity.skills {
+            println!("ID: {}, Nom: {}, Description: {}, Coût en mana: {}, Dégâts physiques: {}, Dégâts magiques: {}",
+                skill.id, skill.name, skill.description, skill.mana_cost, skill.attack_dmg, skill.magic_dmg);
+        }
+    }
 }

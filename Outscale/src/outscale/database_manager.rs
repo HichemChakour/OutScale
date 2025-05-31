@@ -5,6 +5,8 @@ use crate::entities::player::Player;
 use crate::entities::shadow::Shadow;
 use crate::skills::inventaire::Inventaire;
 use crate::skills::object::Objet;
+use crate::skills::skill::Skill;
+
 #[allow(dead_code)]
 pub struct DatabaseManager {
     pub(crate) conn: Connection,
@@ -262,7 +264,7 @@ impl DatabaseManager {
             }
         }
 
-        if let Some(ombre) = &player.ombres {
+        for ombre in &player.ombres {
             Self::sauvegarde_ombre(&self.conn, ombre.clone());
             if let Some(inventaire) = &ombre.entity.inventaire {
                 for objet in &inventaire.liste_objets {
@@ -274,7 +276,6 @@ impl DatabaseManager {
         let mut objets_a_inserer : Vec<Objet> = vec![];
         let mut objets_a_modifier : Vec<Objet> = vec![];
         let mut objets_a_supprimer : Vec<Objet> = vec![];
-
         for objet in tout_les_objets {
             if objet.id == 0 {
                 objets_a_inserer.push(objet);
@@ -313,6 +314,8 @@ impl DatabaseManager {
         for objet in objets_a_supprimer {
             Self::delete_objet(&self.conn, objet.id);
         }
+
+        Self::sauvegarde_skills(&self.conn, &player);
     }
 
     // Correction pour la méthode sauvegarde_modification_objet
@@ -379,7 +382,7 @@ impl DatabaseManager {
 
     fn sauvegarde_ombre(conn: &Connection, ombre: Shadow) {
         conn.execute(
-            "UPDATE entite SET hp = ?1, mana = ?2, magic_resist = ?3, armor = ?4, attack_damage = ?5, magic_damage = ?6, speed = ?7, dodge_chance = ?8, level = ?9, xp = ?10 WHERE id = ?11",
+            "UPDATE entity SET hp = ?1, mana = ?2, magic_resist = ?3, armor = ?4, attack_damage = ?5, magic_damage = ?6, speed = ?7, dodge_chance = ?8, level = ?9, xp = ?10 WHERE id = ?11",
             rusqlite::params![
                 ombre.entity.hp,
                 ombre.entity.mana,
@@ -412,59 +415,63 @@ impl DatabaseManager {
 
     pub fn get_player_data(&self) -> Player {
         // Récupérer les données du joueur
-        let query = "SELECT nom, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp FROM player";
+        let query = "SELECT id,nom, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp FROM player";
         let mut player: Player = self.conn.query_row(query, [], |row| {
             Ok(Player {
                 entity: crate::entities::shadow::Entity::new(
                     row.get(0)?,
                     row.get(1)?,
-                    row.get(1)?,
                     row.get(2)?,
                     row.get(2)?,
+                    row.get(3)?,
                     row.get(3)?,
                     row.get(4)?,
                     row.get(5)?,
                     row.get(6)?,
                     row.get(7)?,
-                    row.get::<_, f32>(8)?,
+                    row.get(8)?,
+                    row.get::<_, f32>(9)?,
                     vec![],
-                    row.get(9)?,
                     row.get(10)?,
+                    row.get(11)?,
                     None
                 ),
-                ombres: None,
+                ombres: vec![],
             })
         }).expect("Erreur lors de la récuperation des données du joueur");
 
         player.entity.inventaire = Self::get_player_inventory(&self);
         player.ombres = Self::get_shadows(&self.conn);
-
+        player.entity.skills = Self::get_skills_by_entity_id(&self.conn, -1);
         for ombre in player.ombres.iter_mut() {
             ombre.entity.inventaire = Self::get_inventaire_by_id_entity(&self, ombre.entity.id).ok();
+            println!("ombre: {:?}", ombre.entity.id);
+            ombre.entity.skills = Self::get_skills_by_entity_id(&self.conn, ombre.entity.id);
         }
         return player;
     }
 
-    fn get_shadows(conn: &Connection) -> Option<Shadow> {
-        let query = "SELECT nom, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp FROM entity WHERE enemy = false";
+    fn get_shadows(conn: &Connection) -> Vec<Shadow> {
+        let query = "SELECT id,nom, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp FROM entity WHERE enemy = false";
         let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
         let shadows_iter = stmt.query_map([], |row| {
             Ok(Shadow {
                 entity: crate::entities::shadow::Entity::new(
                     row.get(0)?,
                     row.get(1)?,
-                    row.get(1)?,
                     row.get(2)?,
                     row.get(2)?,
+                    row.get(3)?,
                     row.get(3)?,
                     row.get(4)?,
                     row.get(5)?,
                     row.get(6)?,
                     row.get(7)?,
-                    row.get::<_, f32>(8)?,
+                    row.get(8)?,
+                    row.get::<_, f32>(9)?,
                     vec![],
-                    row.get(9)?,
                     row.get(10)?,
+                    row.get(11)?,
                     None
                 ),
             })
@@ -472,8 +479,84 @@ impl DatabaseManager {
 
         let mut shadows = Vec::new();
         for shadow in shadows_iter {
+            println!("INSERTION DE LA SHADOW d'ID {}", shadow.as_ref().unwrap().entity.id);
             shadows.push(shadow.expect("Erreur lors de la récupération d'une ombre"));
         }
-        shadows.into_iter().next()
+        shadows
     }
+
+    fn sauvegarde_skills(conn: &Connection, player: &Player) {
+        let mut tout_les_skills: Vec<crate::skills::skill::Skill> = vec![];
+        for skill in &player.entity.skills {
+            tout_les_skills.push(skill.clone());
+        }
+        for ombre in &player.ombres {
+            for skill in &ombre.entity.skills {
+                tout_les_skills.push(skill.clone());
+            }
+        }
+        let mut skill_a_inserer: Vec<crate::skills::skill::Skill> = vec![]; // Les skills a insérer on un id de 0
+        for skill in tout_les_skills {
+            if skill.id == 0 {
+                skill_a_inserer.push(skill);
+            } 
+        }
+        for skill in skill_a_inserer {
+            Self::inserer_skills(&conn, skill);
+        }
+    }
+
+    fn inserer_skills(conn: &Connection, skill: Skill) {
+        conn.execute(
+            "INSERT INTO skills (name,description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, entity_id) \
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
+            rusqlite::params![
+            skill.name,
+            skill.description,
+            skill.hp_refound,
+            skill.mana_cost,
+            skill.mana_refound,
+            skill.magic_resist_debuff,
+            skill.magic_resist_buff,
+            skill.armor_debuff,
+            skill.armor_buff,
+            skill.attack_dmg,
+            skill.attack_dmg_buff,
+            skill.magic_dmg,
+            skill.magic_dmg_buff,
+            skill.entity_id,
+        ],
+        ).expect("Erreur lors de l'insertion du skill dans la base de données");
+    }
+
+    fn get_skills_by_entity_id(conn: &Connection, entity_id: i32) -> Vec<Skill> {
+        let query = "SELECT * FROM skills WHERE entity_id = ?1";
+        let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
+        let skills_iter = stmt.query_map([entity_id], |row| {
+            Ok(Skill {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                description: row.get(2)?,
+                hp_refound: row.get(3)?,
+                mana_cost: row.get(4)?,
+                mana_refound: row.get(5)?,
+                magic_resist_debuff: row.get(6)?,
+                magic_resist_buff: row.get(7)?,
+                armor_debuff: row.get(8)?,
+                armor_buff: row.get(9)?,
+                attack_dmg: row.get(10)?,
+                attack_dmg_buff: row.get(11)?,
+                magic_dmg: row.get(12)?,
+                magic_dmg_buff: row.get(13)?,
+                for_allies: row.get(14)?,
+                entity_id: row.get(15)?
+            })
+        }).expect("Erreur lors de l'exécution de la requête");
+        let mut skills: Vec<Skill> = Vec::new();
+        for skill in skills_iter {
+            skills.push(skill.expect("Erreur lors de la récupération d'une compétence"));
+        }
+        skills
+    }
+    
 }
