@@ -86,18 +86,19 @@ pub fn test_combat(){
         "Soin".to_string(),
         20, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, true,
     );
+  
     let hero = Box::new(crate::entities::player::Player::new(Entity::new("Hero".to_string(), 500, 50, 10, 5, 20, 15, 10, 50.0, vec![boule_de_feu.clone(), coup_de_poing.clone()], 1, None), None)) as Box<dyn HasEntity>;
 
     let enemy1 = Box::new(crate::entities::enemy::Enemy::new(Entity::new(
         "Enemy1".to_string(),
-        80, 30, 8, 4, 15, 10, 12, 50.0,
+        80,80, 30,30, 8, 4, 15, 10, 12, 10.0,
         vec![boule_de_feu.clone(), coup_de_poing.clone()],
         1,None
     ))) as Box<dyn HasEntity>;
 
     let enemy2 = Box::new(crate::entities::enemy::Enemy::new(Entity::new(
         "Enemy2".to_string(),
-        90, 40, 9, 6, 18, 12, 11, 50.0,
+        90, 90, 40,40, 9, 6, 18, 12, 11, 10.0,
         vec![heal.clone()],
         1,None
     ))) as Box<dyn HasEntity>;

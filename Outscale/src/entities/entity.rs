@@ -4,7 +4,9 @@ use crate::skills::inventaire::Inventaire;
 #[derive(Debug, PartialEq, Clone)]
 pub struct Entity {
     pub name: String,
+    pub max_hp: i32,
     pub hp: i32,
+    pub max_mana: i32,
     pub mana: i32,
     pub magic_resist: i32,
     pub armor: i32,
@@ -20,7 +22,9 @@ pub struct Entity {
 impl Entity {
     pub fn new(
         name: String,
+        max_hp: i32,
         hp: i32,
+        max_mana: i32,
         mana: i32,
         magic_resist: i32,
         armor: i32,
@@ -34,7 +38,9 @@ impl Entity {
     ) -> Self {
         Entity {
             name,
+            max_hp,
             hp,
+            max_mana,
             mana,
             magic_resist,
             armor,
