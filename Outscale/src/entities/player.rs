@@ -1,14 +1,16 @@
 use std::any::Any;
+use crate::entities::shadow::Shadow;
 use super::entity::{Entity, HasEntity};
 
 
 pub struct Player {
     pub entity: Entity,
+    pub ombres: Option<Shadow>
 }
 
 impl Player {
-    pub fn new(entity: Entity) -> Self {
-        Player { entity }
+    pub fn new(entity: Entity, ombres : Option<Shadow>) -> Self {
+        Player { entity, ombres }
     }
 }
 
@@ -28,6 +30,7 @@ impl Clone for crate::entities::player::Player {
     fn clone(&self) -> Self {
         Self {
             entity: self.entity.clone(),
+            ombres: self.ombres.as_ref().map(|ombre| ombre.clone()),
         }
     }
 }
