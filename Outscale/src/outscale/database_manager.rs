@@ -38,11 +38,12 @@ impl DatabaseManager {
 
     pub fn insert_player(&self) -> Result<(), Box<dyn std::error::Error>> {
         let mut nom = String::new();
-        println!("Entrez votre nom :");
+        println!("Bonjour Éclatax quel est votre nom ?:");
         io::stdin().read_line(&mut nom)?;
         let nom = nom.trim();
         self.conn.execute(
-            "INSERT INTO player (nom) VALUES (?1)",
+            "INSERT INTO player (nom,hp,mana,magic_resist,armor,attack_damage,magic_damage,speed,dodge_chance,level,xp)\
+             VALUES (?1, 30, 30, 5, 5, 10, 10, 5, 10.0,1,0)",
             &[nom],
         )?;
         Ok(())
@@ -74,11 +75,9 @@ impl DatabaseManager {
             })
         })
     }
-    pub fn get_player_inventory(&self) -> Result<Inventaire> {
+    pub fn get_player_inventory(&self) -> Option<Inventaire> {
+        let id_inventaire = self.get_player_inventory_id().ok()?;
 
-        let id_inventaire = self.get_player_inventory_id()?;
-
-        // Récupérer les IDs des objets spécifiques pour les emplacements
         let query = "SELECT equipement_tete, equipement_torse, equipement_jambe, main1, main2
                  FROM inventaire WHERE id = ?1";
         let (id_tete, id_torse, id_jambe, id_main1, id_main2): (i32, i32, i32, i32, i32) =
@@ -90,22 +89,20 @@ impl DatabaseManager {
                     row.get(3)?,
                     row.get(4)?,
                 ))
-            })?;
+            }).ok()?;
 
-        // Récupérer les objets spécifiques
-        let tete = self.get_objet_by_id(id_tete)?;
-        let torse = self.get_objet_by_id(id_torse)?;
-        let jambes = self.get_objet_by_id(id_jambe)?;
-        let main1 = self.get_objet_by_id(id_main1)?;
-        let main2 = self.get_objet_by_id(id_main2)?;
+        let tete = self.get_objet_by_id(id_tete).ok()?;
+        let torse = self.get_objet_by_id(id_torse).ok()?;
+        let jambes = self.get_objet_by_id(id_jambe).ok()?;
+        let main1 = self.get_objet_by_id(id_main1).ok()?;
+        let main2 = self.get_objet_by_id(id_main2).ok()?;
 
-        // Récupérer tous les objets associés à l'inventaire_id, sauf ceux déjà instanciés
         let mut stmt = self.conn.prepare(
             "SELECT id, inventaire_id, nom, degats, degats_magiques, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet
          FROM objet
          WHERE inventaire_id = ?1
          AND id NOT IN (?2, ?3, ?4, ?5, ?6)",
-        )?;
+        ).ok()?;
         let objets_iter = stmt.query_map(
             [id_inventaire, id_tete, id_torse, id_jambe, id_main1, id_main2],
             |row| {
@@ -124,15 +121,14 @@ impl DatabaseManager {
                     type_objet: row.get(11)?,
                 })
             },
-        )?;
+        ).ok()?;
 
         let mut liste_objets = Vec::new();
         for objet in objets_iter {
-            liste_objets.push(objet?);
+            liste_objets.push(objet.ok()?);
         }
 
-        // Créer l'inventaire
-        Ok(Inventaire {
+        Some(Inventaire {
             id: id_inventaire,
             tete,
             jambes,
@@ -146,7 +142,7 @@ impl DatabaseManager {
     pub fn get_inventaire_by_id_entity(&self, id_entity: i32) -> Result<Inventaire> {
         // Récupérer l'ID de l'inventaire associé à l'entité
         let query = "SELECT id, equipement_tete, equipement_torse, equipement_jambe, main1, main2
-                 FROM inventaire WHERE entite_id = ?1";
+                 FROM inventaire WHERE entity_id = ?1";
         let (id_inventaire, id_tete, id_torse, id_jambe, id_main1, id_main2): (i32, i32, i32, i32, i32, i32) =
             self.conn.query_row(query, [id_entity], |row| {
                 Ok((
@@ -383,7 +379,7 @@ impl DatabaseManager {
 
     fn sauvegarde_ombre(conn: &Connection, ombre: Shadow) {
         conn.execute(
-            "UPDATE shadow SET hp = ?1, mana = ?2, magic_resist = ?3, armor = ?4, attack_damage = ?5, magic_damage = ?6, speed = ?7, dodge_chance = ?8, level = ?9, xp = ?10 WHERE nom = ?11",
+            "UPDATE entite SET hp = ?1, mana = ?2, magic_resist = ?3, armor = ?4, attack_damage = ?5, magic_damage = ?6, speed = ?7, dodge_chance = ?8, level = ?9, xp = ?10 WHERE id = ?11",
             rusqlite::params![
                 ombre.entity.hp,
                 ombre.entity.mana,
@@ -395,7 +391,7 @@ impl DatabaseManager {
                 ombre.entity.dodge_chance as i32,
                 ombre.entity.level,
                 ombre.entity.xp,
-                ombre.entity.name
+                ombre.entity.id
             ],
         ).expect("Erreur lors de la mise à jour de l'ombre dans la base de données");
 
@@ -412,5 +408,72 @@ impl DatabaseManager {
                 ],
             ).expect("Erreur lors de la sauvegarde de l'inventaire de l'ombre dans la base de données");
         }
+    }
+
+    pub fn get_player_data(&self) -> Player {
+        // Récupérer les données du joueur
+        let query = "SELECT nom, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp FROM player";
+        let mut player: Player = self.conn.query_row(query, [], |row| {
+            Ok(Player {
+                entity: crate::entities::shadow::Entity::new(
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                    row.get(6)?,
+                    row.get(7)?,
+                    row.get::<_, f32>(8)?,
+                    vec![],
+                    row.get(9)?,
+                    row.get(10)?,
+                    None
+                ),
+                ombres: None,
+            })
+        }).expect("Erreur lors de la récuperation des données du joueur");
+
+        player.entity.inventaire = Self::get_player_inventory(&self);
+        player.ombres = Self::get_shadows(&self.conn);
+
+        for ombre in player.ombres.iter_mut() {
+            ombre.entity.inventaire = Self::get_inventaire_by_id_entity(&self, ombre.entity.id).ok();
+        }
+        return player;
+    }
+
+    fn get_shadows(conn: &Connection) -> Option<Shadow> {
+        let query = "SELECT nom, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp FROM entity WHERE enemy = false";
+        let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
+        let shadows_iter = stmt.query_map([], |row| {
+            Ok(Shadow {
+                entity: crate::entities::shadow::Entity::new(
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                    row.get(6)?,
+                    row.get(7)?,
+                    row.get::<_, f32>(8)?,
+                    vec![],
+                    row.get(9)?,
+                    row.get(10)?,
+                    None
+                ),
+            })
+        }).expect("Erreur lors de l'exécution de la requête");
+
+        let mut shadows = Vec::new();
+        for shadow in shadows_iter {
+            shadows.push(shadow.expect("Erreur lors de la récupération d'une ombre"));
+        }
+        shadows.into_iter().next()
     }
 }

@@ -1,6 +1,6 @@
 use std::any::Any;
 use crate::entities::shadow::Shadow;
-use super::entity::{Entity, HasEntity};
+pub(crate) use super::entity::{Entity, HasEntity};
 
 
 pub struct Player {

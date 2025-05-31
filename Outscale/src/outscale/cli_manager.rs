@@ -6,9 +6,13 @@ use crate::entities::player::Player;
 use crate::outscale::database_manager::DatabaseManager;
 use crate::outscale::zone::*;
 
+use crossterm::{
+    event::{read, Event, KeyCode},
+    execute,
+    terminal::{ClearType, Clear},
+};
 // Fonction qui applique les styles aux balises du texte
 fn apply_styles(text: &str) -> String {
-    // Liste des styles avec leurs balises et styles correspondants
     let styles = vec![
         ("[italique]", "\x1b[3m", "[/italique]", "\x1b[0m"),
         ("[gras]", "\x1b[1m", "[/gras]", "\x1b[0m"),
@@ -18,8 +22,6 @@ fn apply_styles(text: &str) -> String {
     ];
 
     let mut styled_text = text.to_string();
-
-    // Remplacer les balises par les codes ANSI de style
     for (start_tag, start_style, end_tag, end_style) in styles {
         styled_text = styled_text.replace(start_tag, start_style).replace(end_tag, end_style);
     }
@@ -41,18 +43,12 @@ pub fn demander_au_joueur(prompt: &str) -> String {
 // Fonction qui lit un fichier texte et applique les balises de style
 pub fn redaction_histoire(fichier: &str) {
     use std::{thread, time};
-    use std::io::{self, Read};
-    use termion::event::Key;
-    use termion::input::TermRead;
-    use termion::raw::IntoRawMode;
 
-    // Vérification de l'existence du fichier
     if !Path::new(fichier).exists() {
         eprintln!("Erreur : Le fichier spécifié n'existe pas : {}", fichier);
         return;
     }
 
-    // Lecture du contenu du fichier
     let contenu = match fs::read_to_string(fichier) {
         Ok(c) => c,
         Err(e) => {
@@ -61,55 +57,36 @@ pub fn redaction_histoire(fichier: &str) {
         }
     };
 
-    // Applique les styles au texte du fichier
     let sortie = apply_styles(&contenu);
-
-    // Diviser le texte en lignes
     let lignes: Vec<&str> = sortie.split('\n').collect();
 
-    // Afficher chaque ligne et attendre l'appui sur Espace
     for (i, ligne) in lignes.iter().enumerate() {
-        // Affiche la ligne caractère par caractère
         for c in ligne.chars() {
             print!("{}", c);
             io::stdout().flush().unwrap();
             thread::sleep(time::Duration::from_millis(20));
         }
 
-        // Si ce n'est pas la dernière ligne, attendre l'appui sur Espace
         if i < lignes.len() - 1 {
-            println!(); // Imprime le saut de ligne
-
-            // Affiche le message en gris
+            println!();
             print!("\x1b[90mAppuyez sur Espace pour continuer...\x1b[0m");
             io::stdout().flush().unwrap();
 
-            // Attend que l'utilisateur appuie sur Espace
-            let stdin = io::stdin();
-            let mut stdout = io::stdout().into_raw_mode().unwrap();
-            let mut keys = stdin.keys();
-
             loop {
-                if let Some(Ok(key)) = keys.next() {
-                    if key == Key::Char(' ') {
+                if let Event::Key(key_event) = read().unwrap() {
+                    if key_event.code == KeyCode::Char(' ') {
                         break;
                     }
                 }
             }
 
-            // Efface la ligne du message
-            print!("\r");
-            print!("\x1B[K"); // Code ANSI pour effacer jusqu'à la fin de la ligne
-            io::stdout().flush().unwrap();
+            execute!(io::stdout(), Clear(ClearType::CurrentLine)).unwrap();
+            println!("");
         }
     }
     println!();
 }
 
-// Test avec du texte statique
-pub fn redaction_histoire_test() {
-
-}
 pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player: &mut Player) {
     println!("Vous êtes actuellement dans la zone : {}. Que comptez vous faire ?", zone_actuelle);
     println!("i. Ouvrir l'inventaire de vos personnages");

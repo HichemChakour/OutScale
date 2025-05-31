@@ -66,13 +66,12 @@ CREATE TABLE IF NOT EXISTS entity (
 
 CREATE TABLE IF NOT EXISTS inventaire (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    entite_id INTEGER,
+    entity_id INTEGER,
     equipement_tete INTEGER,
     equipement_torse INTEGER,
     equipement_jambe INTEGER,
     main1 INTEGER,
-    main2 INTEGER,
-    FOREIGN KEY(entite_id) REFERENCES entite(id)
+    main2 INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS objet (
@@ -142,7 +141,7 @@ FOR EACH ROW
 BEGIN
     INSERT INTO inventaire_skills (id) VALUES (NULL);
     UPDATE player SET inventaire_skills_id = (SELECT last_insert_rowid()) WHERE id = NEW.id;
-    INSERT INTO inventaire (entite_id) VALUES (NEW.id);
+    INSERT INTO inventaire (entity_id) VALUES (NEW.id);
     UPDATE player SET inventaire_id = (SELECT last_insert_rowid()) WHERE id = NEW.id;
 END;
 
@@ -152,7 +151,7 @@ FOR EACH ROW
 BEGIN
     INSERT INTO inventaire_skills (id) VALUES (NULL);
     UPDATE entity SET inventaire_skills_id = (SELECT last_insert_rowid()) WHERE nom = NEW.nom;
-    INSERT INTO inventaire (entite_id) VALUES (NEW.inventaire_id);
+    INSERT INTO inventaire (entity_id) VALUES (NEW.inventaire_id);
     UPDATE entity SET inventaire_id = (SELECT last_insert_rowid()) WHERE nom = NEW.nom;
 END;
 

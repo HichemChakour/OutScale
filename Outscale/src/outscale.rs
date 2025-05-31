@@ -10,6 +10,8 @@ pub mod zone;
 use std::env;
 //use std::env;
 use crate::entities::entity::{Entity, HasEntity};
+use crate::entities::player;
+use crate::entities::player::Player;
 use crate::outscale::combat_manager::CombatManager;
 
 use crate::skills::inventaire;
@@ -23,7 +25,8 @@ pub fn get_db_path() -> String {
 }
 
 pub fn run() {
-    /*
+
+    let mut player : Player;
     if !database_manager::DatabaseManager::file_exists(DB_PATH) {
         println!("Le fichier save.db n'existe pas. Création d'une nouvelle partie...");
 
@@ -33,7 +36,6 @@ pub fn run() {
             return;
         }
         println!("Base de données initialisée avec succès.");
-        return;
     }
 
     // Instanciation de DatabaseManager
@@ -48,6 +50,7 @@ pub fn run() {
     match db_manager.has_player_data() {
         Ok(true) => {
             println!("Une partie existante a été trouvée. Chargement...");
+            player = db_manager.get_player_data();
             lancement_mode_histoire();
         }
         Ok(false) => {
@@ -56,16 +59,14 @@ pub fn run() {
                 return;
             } else {
                 println!("Joueur inséré avec succès !");
-                lancement_mode_histoire();
             }
         }
         Err(e) => {
             eprintln!("Erreur lors de la vérification de la table player : {}", e);
             return;
         }
-    }*/
+    }
 
-    //test_combat();
     lancement_mode_histoire();
     return;
 }

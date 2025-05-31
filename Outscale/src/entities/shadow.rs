@@ -1,6 +1,6 @@
 use std::any::Any;
 // shadow.rs
-use super::entity::{Entity, HasEntity};
+pub(crate) use super::entity::{Entity, HasEntity};
 
 pub struct Shadow {
     pub entity: Entity,
