@@ -105,6 +105,7 @@ mod tests {
 
         // Création d'un joueur fictif
         let entity = Entity::new(
+            1,
             "JoueurTest".to_string(),
             100,
             100,
@@ -115,14 +116,14 @@ mod tests {
             30,
             40,
             10,
-            0.1,
+            1.0,
             vec![],
             1,
-            0,
+            1,
             Some(inventaire),
         );
 
-        let player = Player::new(entity, None);
+        let player = Player::new(entity, vec![]);
 
         // Insérer d'abord le joueur dans la base de données
         db_manager.conn.execute(
