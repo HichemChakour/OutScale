@@ -293,4 +293,43 @@ impl CombatManager {
 
         EnnemiManager::enemy_action(enemy, &mut self.allies, &mut self.enemies);
     }
+
+    pub fn start_combat_loop(&mut self) {
+        println!("Le combat commence !");
+
+        while !self.allies.is_empty() && !self.enemies.is_empty() {
+            self.determine_turn_order();
+
+            for entity in self.turn_order.clone() {
+                // Vérifier si l'entité est encore en vie
+                if entity.entity().hp <= 0 {
+                    continue;
+                }
+
+                let is_ally = self.allies.iter().any(|a| a.entity().name == entity.entity().name);
+
+                if is_ally {
+                    self.player_turn(entity);
+                } else {
+                    self.enemy_turn(entity);
+                }
+
+                // Retirer les entités mortes après chaque action
+                self.allies.retain(|ally| ally.entity().hp > 0);
+                self.enemies.retain(|enemy| enemy.entity().hp > 0);
+
+                // Vérifier si le combat est terminé
+                if self.allies.is_empty() || self.enemies.is_empty() {
+                    break;
+                }
+            }
+        }
+
+        // Déterminer le vainqueur
+        if self.allies.is_empty() {
+            println!("Les ennemis ont gagné !");
+        } else {
+            println!("Les alliés ont gagné !");
+        }
+    }
 }

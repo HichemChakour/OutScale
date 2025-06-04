@@ -1,3 +1,4 @@
+use rand::prelude::IteratorRandom;
 use rand::Rng;
 use rand::seq::{IndexedMutRandom, /*SliceRandom*/};
 use crate::entities::entity::HasEntity;
@@ -24,7 +25,7 @@ impl EnnemiManager {
 
         if usable_skills.is_empty() {
             // Si aucune compétence n'est utilisable, effectuer une attaque de base
-            if let Some(target) = enemies.as_mut_slice().choose_mut(&mut rng) {
+            if let Some(target) = allies.iter_mut().choose(&mut rng) {
                 let damage = enemy.based_attack();
                 let damage_taken = target.entity_mut().apply_damage(damage);
                 println!(
