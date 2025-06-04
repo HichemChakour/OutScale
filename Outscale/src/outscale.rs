@@ -6,6 +6,7 @@ pub(crate) mod cli_manager;
 mod combat_manager;
 mod ennemi_manager;
 pub mod zone;
+mod les_remparts;
 
 use std::env;
 use crate::entities::enemy::Enemy;
@@ -71,10 +72,11 @@ pub fn run() {
     }
 
     //lancement_mode_histoire();
-    test_skills_et_combat(&mut player);
-    db_manager.sauvegarde(player);
-    let mut player2 = db_manager.get_player_data();
-    test_recup_skills(&mut player2);
+   // test_skills_et_combat(&mut player);
+    //db_manager.sauvegarde(player);
+    //let mut player2 = db_manager.get_player_data();
+    //test_recup_skills(&mut player2);
+    test_les_remparts();
     return;
 }
 
@@ -152,4 +154,35 @@ pub fn test_recup_skills(player: &mut Player) {
                 skill.id, skill.name, skill.description, skill.mana_cost, skill.attack_dmg, skill.magic_dmg);
         }
     }
+}
+
+pub fn test_les_remparts(){
+    let mut OperatorSkill = Skill::new(
+        0,
+        "Opérateur".to_string(),
+        "Un opérateur de combat surentraîné qui élimine tout sur son passage.".to_string(),
+        0,
+        0,
+        100,
+        100,
+        100,
+        100,
+        100,
+        9999,
+        1000,
+        9999,
+        1000,
+        false,
+        -1
+    );
+    let mut playerTest = Player::new(
+        Entity::new(
+            0,
+            "TestPlayer".to_string(),
+            100, 100, 10, 10, 5, 5, 1, 1, 1, 1.0, vec![], 1, 0, None,
+        ),
+        vec![],
+    );
+    playerTest.entity.skills.push(OperatorSkill);
+    les_remparts::lancer_les_remparts(&mut playerTest);
 }
