@@ -6,6 +6,7 @@ pub(crate) mod cli_manager;
 mod combat_manager;
 mod ennemi_manager;
 pub mod zone;
+mod extraction_manager;
 
 use std::env;
 use crate::entities::enemy::Enemy;
@@ -94,7 +95,7 @@ pub fn test_skills_et_combat(player: &mut Player) {
         0,
         "GROS COUP DE BITE".to_string(),
         "Inflige des dégâts physiques à l'ennemi.".to_string(),
-        0, 10, 0, 0, 0, 0, 5, 0, 0, 0, 1, false, -1,
+        0, 10, 0, 0, 0, 0, 0, 1000, 0, 0, 0, false, -1,
     );
     let mut skill3 = skill2.clone();
     skill3.entity_id = 1;
@@ -116,14 +117,14 @@ pub fn test_skills_et_combat(player: &mut Player) {
 
     // Création des ennemis
     let ennemi1 = Entity::new(
-        1,
+        2,
         "Ennemi 1".to_string(),
-        100, 100, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 0, None,
+        100, 100, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 0, 2,None
     );
     let ennemi2 = Entity::new(
-        2,
+        3,
         "Ennemi 2".to_string(),
-        100, 100, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 0, None,
+        100, 100, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 0,  2,None
     );
     let ennemies: Vec<Box<dyn HasEntity>> = vec![
         Box::new(Enemy::new(ennemi1)),

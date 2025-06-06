@@ -18,6 +18,7 @@ pub struct Entity {
     pub skills: Vec<Skill>,
     pub level: i32,
     pub xp: i32,
+    pub classe_id : i32,
     pub inventaire: Option<Inventaire>
 }
 
@@ -38,7 +39,9 @@ impl Entity {
         skills: Vec<Skill>,
         level: i32,
         xp: i32,
-        inventaire: Option<Inventaire>,
+        classe_id : i32,
+        inventaire: Option<Inventaire>
+
     ) -> Self {
         Entity {
             id,
@@ -56,6 +59,7 @@ impl Entity {
             skills,
             level,
             xp,
+            classe_id,
             inventaire
         }
     }

@@ -25,7 +25,9 @@ DROP TABLE IF EXISTS journal;
 CREATE TABLE IF NOT EXISTS player (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT DEFAULT NULL,
+    max_hp INTEGER DEFAULT NULL,
     hp INTEGER DEFAULT NULL,
+    max_mana INTEGER DEFAULT NULL,
     mana INTEGER DEFAULT NULL,
     magic_resist INTEGER DEFAULT NULL,
     armor INTEGER DEFAULT NULL,
@@ -44,7 +46,9 @@ CREATE TABLE IF NOT EXISTS entity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT DEFAULT NULL,
     enemy BOOLEAN DEFAULT NULL, --true = ennemi, false = shadow
+    max_hp INTEGER DEFAULT NULL,
     hp INTEGER DEFAULT NULL,
+    max_mana INTEGER DEFAULT NULL,
     mana INTEGER DEFAULT NULL,
     magic_resist INTEGER DEFAULT NULL,
     armor INTEGER DEFAULT NULL,
@@ -141,6 +145,7 @@ BEGIN
 END;
 
 -- Insertion des classes
+INSERT INTO classe (nom) VALUES ('Necromancien');
 INSERT INTO classe (nom) VALUES ('Guerrier');
 INSERT INTO classe (nom) VALUES ('Sorcier');
 INSERT INTO classe (nom) VALUES ('Rodeur');
@@ -160,5 +165,5 @@ INSERT INTO zones (nom, description) VALUES ('Palais des Papes', 'Palais du Pape
 INSERT INTO objet(nom, degats, armure, taux_critique, mana, vitesse, degats_magique, magic_resist, hp, type_objet) VALUES
         ('Excaliburne', 100, 0, 0, 0, 0, 0, 0, 0, 'arme');
 
-INSERT INTO entity(nom, enemy, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id) VALUES
-        ('RAVUS', 0, 1000, 0, 0, 0, 100, 0, 0, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'));
+INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id) VALUES
+        ('RAVUS', 0, 1000,1000,0, 0, 0, 0, 100, 0, 0, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'));
