@@ -296,7 +296,8 @@ impl CombatManager {
 
     pub fn start_combat_loop(&mut self) {
         println!("Le combat commence !");
-
+        let defeated_enemies = self.enemies.clone();
+        
         while !self.allies.is_empty() && !self.enemies.is_empty() {
             self.determine_turn_order();
 
@@ -330,6 +331,10 @@ impl CombatManager {
             println!("Les ennemis ont gagné !");
         } else {
             println!("Les alliés ont gagné !");
+            
+            // Proposer l'extraction des ennemis vaincus
+            use crate::outscale::extraction_manager::ExtractionManager;
+            ExtractionManager::offer_extraction(&defeated_enemies);
         }
     }
 }
