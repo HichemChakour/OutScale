@@ -59,8 +59,8 @@ impl Skill {
         }
     }
     pub fn calculate_damage(&self, caster: &Entity, target: &Entity) -> i32 {
-        let physical_damage = self.attack_dmg + caster.attack_dmg;
-        let magic_damage = self.magic_dmg + caster.magic_dmg;
+        let physical_damage = (self.attack_dmg as f64 * (0.1 * caster.attack_dmg as f64)) as i32;
+        let magic_damage = (self.magic_dmg as f64 * (0.1 * caster.magic_dmg as f64)) as i32;
 
         // Réduction des dégâts physiques en fonction de l'armure de la cible
         let physical_reduction = target.armor as f32 / (target.armor as f32 + 100.0);
@@ -72,7 +72,6 @@ impl Skill {
 
         // Dégâts totaux
         let total_damage = reduced_physical_damage + reduced_magic_damage;
-
         total_damage as i32
     }
     pub fn apply_effects(&self, caster: &mut Entity, target: &mut Entity) -> String {
