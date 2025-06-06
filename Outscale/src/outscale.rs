@@ -7,6 +7,7 @@ mod combat_manager;
 mod ennemi_manager;
 pub mod zone;
 mod extraction_manager;
+mod levelup_manager;
 
 use std::env;
 use crate::entities::enemy::Enemy;
@@ -119,12 +120,12 @@ pub fn test_skills_et_combat(player: &mut Player) {
     let ennemi1 = Entity::new(
         2,
         "Ennemi 1".to_string(),
-        100, 100, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 0, 2,None
+        2000, 2000, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 125, 2,None
     );
     let ennemi2 = Entity::new(
         3,
         "Ennemi 2".to_string(),
-        100, 100, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 0,  2,None
+        2000, 2000, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 125,  2,None
     );
     let ennemies: Vec<Box<dyn HasEntity>> = vec![
         Box::new(Enemy::new(ennemi1)),

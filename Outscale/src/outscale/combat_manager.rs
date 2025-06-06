@@ -290,14 +290,16 @@ impl CombatManager {
 
     fn enemy_turn(&mut self, enemy: Box<dyn HasEntity>) {
         println!("C'est au tour de \x1b[31m{}\x1b[0m de jouer ", enemy.entity().name);
-
+        thread::sleep_ms(1000);
         EnnemiManager::enemy_action(enemy, &mut self.allies, &mut self.enemies);
+        thread::sleep_ms(500);
     }
 
+    // Dans combat_manager.rs, modifiez le code existant de start_combat_loop
     pub fn start_combat_loop(&mut self) {
         println!("Le combat commence !");
         let defeated_enemies = self.enemies.clone();
-        
+
         while !self.allies.is_empty() && !self.enemies.is_empty() {
             self.determine_turn_order();
 
@@ -331,7 +333,16 @@ impl CombatManager {
             println!("Les ennemis ont gagné !");
         } else {
             println!("Les alliés ont gagné !");
-            
+
+            // Distribution de l'XP aux alliés
+            use crate::outscale::levelup_manager::LevelUpManager;
+            let xp_result = LevelUpManager::distribute_xp(&mut self.allies, &defeated_enemies);
+            println!("{}", xp_result);
+
+            // Afficher la progression vers le prochain niveau
+            let progress = LevelUpManager::show_xp_progress(&self.allies);
+            println!("{}", progress);
+
             // Proposer l'extraction des ennemis vaincus
             use crate::outscale::extraction_manager::ExtractionManager;
             ExtractionManager::offer_extraction(&defeated_enemies);
