@@ -162,16 +162,16 @@ pub fn test_les_remparts(){
         "Opérateur".to_string(),
         "Un opérateur de combat surentraîné qui élimine tout sur son passage.".to_string(),
         0,
+        -150,
         0,
-        100,
-        100,
-        100,
-        100,
-        100,
+        0,
+        0,
+        0,
+        0,
         9999,
-        1000,
+        0,
         9999,
-        1000,
+        0,
         false,
         -1
     );
@@ -179,7 +179,7 @@ pub fn test_les_remparts(){
         Entity::new(
             0,
             "TestPlayer".to_string(),
-            100, 100, 10, 10, 5, 5, 1, 1, 1, 1.0, vec![], 1, 0, None,
+            400, 700, 10, 10, 5, 5, 1, 1, 1, 1.0, vec![], 1, 0, None,
         ),
         vec![],
     );

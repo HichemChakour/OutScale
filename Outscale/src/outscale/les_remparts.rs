@@ -4,7 +4,7 @@ use crate::outscale::combat_manager::CombatManager;
 use rand::seq::SliceRandom;
 use rand::Rng;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{self, BufRead, BufReader, Write};
 use rand::prelude::IndexedRandom;
 use crate::skills::skill::Skill;
 
@@ -16,10 +16,20 @@ pub fn lancer_les_remparts(player: &mut crate::entities::player::Player) {
     let suffixes = lire_lignes_depuis_fichier("src/resources/prefixes_suffixes.txt", "# Suffixes");
     let noms_complets = lire_lignes_depuis_fichier("src/resources/noms_et_titres.txt", "# Noms complets");
     let titres = lire_lignes_depuis_fichier("src/resources/noms_et_titres.txt", "# Titres");
-
+    let mut nb_round: i32 = lire_lignes_depuis_fichier("src/resources/prefixes_suffixes.txt", "# Rounds")
+        .get(0)
+        .and_then(|s| s.parse::<i32>().ok())
+        .unwrap_or(0);
+    lancer_combat_remparts(player, &prefixes, &suffixes, &noms_complets, &titres, &mut nb_round);
+}
+fn lancer_combat_remparts(player: &mut crate::entities::player::Player, prefixes: &[String], suffixes: &[String], noms_complets: &[String], titres: &[String], nb_round: &mut i32) {
     loop {
-        // Calcul de la moyenne des niveaux
-        let total_level: i32 = player.ombres.iter().map(|ombre| ombre.entity.level).sum::<i32>() + player.entity.level;
+        println!("Round {} des Remparts", nb_round);
+        let mut total_level = 6;
+        if( total_level > 12) {
+            total_level = player.ombres.iter().map(|ombre| ombre.entity.level).sum::<i32>() + player.entity.level;
+            return;
+        }
         let average_level = total_level / (player.ombres.len() as i32 + 1);
 
         // Génération des ennemis
@@ -29,7 +39,7 @@ pub fn lancer_les_remparts(player: &mut crate::entities::player::Player) {
             let enemy_level = average_level + rng.random_range(-1..=1); // Niveau légèrement ajusté
             let enemy_name = generer_nom_aleatoire(&prefixes, &suffixes, &noms_complets, &titres, &mut rng);
             let enemy = Enemy::new(Entity::new(
-                i + 1,
+                0,
                 enemy_name,
                 50 + enemy_level * 10,
                 50 + enemy_level * 10,
@@ -38,9 +48,9 @@ pub fn lancer_les_remparts(player: &mut crate::entities::player::Player) {
                 5 + enemy_level,
                 5 + enemy_level,
                 10 + enemy_level * 2,
-                5 + enemy_level,
+                5 + enemy_level * 2,
                 10 + enemy_level,
-                5.0,
+                5.0 + enemy_level as f32 * 0.2,
                 vec![],
                 enemy_level,
                 0,
@@ -61,22 +71,28 @@ pub fn lancer_les_remparts(player: &mut crate::entities::player::Player) {
         combat_manager.start_combat_loop();
 
         // Vérification de la défaite
-        if player.entity.hp <= 0 {
+        if !combat_manager.victory {
             println!("Vous avez été vaincu. Fin des Remparts.");
+            write_nb_round("src/resources/prefixes_suffixes.txt", *nb_round);
             break;
         }
 
         // Demander au joueur s'il veut continuer
+        if( *nb_round == 4) {
+            // Robin lancera le script d'histoire
+            println!("Vous avez fait tout les combats Canons. Vous pouvez continuer l'histoire. Mais vous pouvez continuer à défendre Avignaura au frond si vous désirez.");
+        }
+        *nb_round += 1;
         println!("Souhaitez-vous continuer à combattre ? (o/n)");
         let mut choix = String::new();
         std::io::stdin().read_line(&mut choix).unwrap();
         if choix.trim().eq_ignore_ascii_case("n") {
             println!("Vous quittez les Remparts. Bravo pour votre performance !");
+            write_nb_round("src/resources/prefixes_suffixes.txt", *nb_round);
             break;
         }
     }
 }
-
 fn generer_nom_aleatoire(
     prefixes: &[String],
     suffixes: &[String],
@@ -164,4 +180,33 @@ fn charger_skills_depuis_fichier(chemin: &str) -> Vec<Skill> {
     let file = File::open(chemin).expect("Impossible d'ouvrir le fichier skills.json");
     let reader = BufReader::new(file);
     serde_json::from_reader(reader).expect("Erreur lors du parsing du fichier JSON")
+}
+fn write_nb_round(chemin: &str, nb_round: i32) {
+    let file = File::open(chemin).expect("Impossible d'ouvrir le fichier");
+    let reader = BufReader::new(file);
+    let mut lignes: Vec<String> = Vec::new();
+    let mut dans_section = false;
+
+    for ligne in reader.lines() {
+        let ligne = ligne.expect("Erreur lors de la lecture du fichier");
+        if ligne.trim() == "# Rounds" {
+            dans_section = true;
+            lignes.push(ligne);
+            continue;
+        }
+        if ligne.starts_with('#') && dans_section {
+            dans_section = false;
+        }
+        if dans_section {
+            lignes.push(nb_round.to_string());
+            dans_section = false;
+        } else {
+            lignes.push(ligne);
+        }
+    }
+
+    let mut file = File::create(chemin).expect("Impossible de réécrire le fichier");
+    for ligne in lignes {
+        writeln!(file, "{}", ligne).expect("Erreur lors de l'écriture dans le fichier");
+    }
 }
