@@ -25,7 +25,9 @@ DROP TABLE IF EXISTS journal;
 CREATE TABLE IF NOT EXISTS player (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT DEFAULT NULL,
+    max_hp INTEGER DEFAULT NULL,
     hp INTEGER DEFAULT NULL,
+    max_mana INTEGER DEFAULT NULL,
     mana INTEGER DEFAULT NULL,
     magic_resist INTEGER DEFAULT NULL,
     armor INTEGER DEFAULT NULL,
@@ -44,7 +46,9 @@ CREATE TABLE IF NOT EXISTS entity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT DEFAULT NULL,
     enemy BOOLEAN DEFAULT NULL, --true = ennemi, false = shadow
+    max_hp INTEGER DEFAULT NULL,
     hp INTEGER DEFAULT NULL,
+    max_mana INTEGER DEFAULT NULL,
     mana INTEGER DEFAULT NULL,
     magic_resist INTEGER DEFAULT NULL,
     armor INTEGER DEFAULT NULL,
@@ -145,6 +149,8 @@ INSERT INTO classe (nom) VALUES ('Guerrier');
 INSERT INTO classe (nom) VALUES ('Sorcier');
 INSERT INTO classe (nom) VALUES ('Rodeur');
 INSERT INTO classe (nom) VALUES ('Tank');
+INSERT INTO classe (nom) VALUES ('Drake');
+
 
 
 --Insertion des zones
@@ -160,5 +166,39 @@ INSERT INTO zones (nom, description) VALUES ('Palais des Papes', 'Palais du Pape
 INSERT INTO objet(nom, degats, armure, taux_critique, mana, vitesse, degats_magique, magic_resist, hp, type_objet) VALUES
         ('Excaliburne', 100, 0, 0, 0, 0, 0, 0, 0, 'arme');
 
-INSERT INTO entity(nom, enemy, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id) VALUES
-        ('RAVUS', 0, 1000, 0, 0, 0, 100, 0, 0, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'));
+INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+        ('Gardien Corrompu', 1, 50,50,0, 0, 0, 0, 20, 0, 5, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'),100, 1);
+
+/*Zone2 Le roché des doms*/
+INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+        ('Gardien du temple', 1, 300, 300, 300, 300, 50, 50, 65, 5, 10, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'), 50, 2);
+
+INSERT INTO  entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+        ('Le prêtre', 1, 200, 200, 500, 500, 20, 20, 30, 70, 0, 0.2, (SELECT id FROM classe WHERE nom = 'Sorcier'), 50, 2);
+
+INSERT INTO  entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+    ('L`imame', 1, 200, 200, 500, 500, 20, 20, 30, 70, 0, 0.2, (SELECT id FROM classe WHERE nom = 'Sorcier'), 50, 2);
+
+INSERT INTO skills (name, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) VALUES
+    ('Gros cout de massue', 'Inflige de lourds dégâts physiques à l`ennemi.', 0, 50, 0, 0, 0, 0, 0, 100, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Gardien du temple'), NULL),
+    ('Rappel Religieux', 'Soigne une partie des points de vie de l`entité.', 100, 30, 0, 0, 5, 0, 5, 0, 5, 0, 5, TRUE, (SELECT id FROM entity WHERE nom = 'L`imame'), NULL),
+    ('Bouclier magique', 'Augmente la résistance magique de l`entité.', 0, 40, 0, 0, 20, 0, 0, 0, 0, 0,0, FALSE, (SELECT id FROM entity WHERE nom = 'Le prêtre'), NULL);
+
+/*Zone4 Le mont favé*/
+INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+    ('Le dragon noir', 1, 1000, 1000, 300, 300, 150, 150, 90, 100, 150, 0.1, (SELECT id FROM classe WHERE nom = 'Drake'), 300, 10);
+
+INSERT INTO skills (name, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) VALUES
+    ('Souffle de feu', 'Inflige de lourds dégâts magiques à tous les ennemis.', 0, 100, 0, 0, 0, 0, 0, 70, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Le dragon noir'), NULL),
+    ('Charge du dragon', 'Inflige des dégâts physiques à l`ennemi et le repousse.', 0, 80, 0, 0, 0, 0, 0, 50, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Le dragon noir'), NULL),
+    ('Grosse carapace', 'Soigne une partie des points de vie du dragon.', 200, 50, 0, 0, 10, 0, 10, 0, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Le dragon noir'), NULL);
+
+/*Zone5 palais des papes*/
+
+INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+    ('Pape corrompu', 1, 1500, 1500, 500, 500, 200, 200, 120, 150, 100, 0.1, (SELECT id FROM classe WHERE nom = 'Sorcier'), 300, 15);
+
+INSERT INTO skills (name, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) VALUES
+    ('Foudre divine', 'Inflige de lourds dégâts magiques à l`ennemi.', 0, 120, 0, 0, 0, 0, 0, 30, 0, 60, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Pape corrompu'), NULL),
+    ('Bénédiction du pape', 'Soigne une partie des points de vie de l`entité et augmente sa résistance magique.', 200, 0, 200, 20, 0, 0, 0, 0, 0, 0,0, TRUE, (SELECT id FROM entity WHERE nom = 'Pape corrompu'), NULL),
+    ('Châtiment divin', 'Inflige des dégâts magiques à tous les ennemis et réduit leur armure.', 0, 150, 0, -30, 0, -30, 0, 50, 0, 50,0, FALSE, (SELECT id FROM entity WHERE nom = 'Pape corrompu'), NULL);

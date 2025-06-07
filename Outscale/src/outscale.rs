@@ -5,16 +5,18 @@ mod init_tables;
 pub(crate) mod cli_manager;
 mod combat_manager;
 mod ennemi_manager;
-pub mod zone;
+pub mod zone
 mod les_remparts;
+mod extraction_manager;
+mod levelup_manager;
 
 use std::env;
 use crate::entities::enemy::Enemy;
-//use std::env;
 use crate::entities::entity::{Entity, HasEntity};
 use crate::entities::player;
 use crate::entities::player::Player;
 use crate::entities::shadow::Shadow;
+use crate::outscale::cli_manager::menu_principal;
 use crate::outscale::combat_manager::CombatManager;
 
 use crate::skills::inventaire;
@@ -55,7 +57,6 @@ pub fn run() {
         Ok(true) => {
             println!("Une partie existante a été trouvée. Chargement...");
             player = db_manager.get_player_data();
-            //lancement_mode_histoire();
         }
         Ok(false) => {
             if let Err(e) = db_manager.insert_player() {
@@ -63,6 +64,7 @@ pub fn run() {
                 return;
             } else {
                 player = db_manager.get_player_data();
+               // lancement_mode_histoire();
             }
         }
         Err(e) => {
@@ -77,12 +79,23 @@ pub fn run() {
     //let mut player2 = db_manager.get_player_data();
     //test_recup_skills(&mut player2);
     test_les_remparts();
+    let mut player_mut = player;
+    let zone_initiale = "AvignAura"; // Zone de départ par défaut
+
+    // Marquer la zone comme visitée
+    db_manager.visite_lieu(zone_initiale);
+
+    // Lancer le menu principal
+    use crate::outscale::cli_manager::menu_principal;
+    menu_principal(&db_manager, zone_initiale, &mut player_mut);
     return;
 }
 
 pub fn lancement_mode_histoire() {
    cli_manager::redaction_histoire(&*(RESOURCE_DIR.to_owned() + "/dialogue/Introduction.txt"));
 }
+
+
 
 pub fn test_skills_et_combat(player: &mut Player) {
     // Création des compétences
@@ -96,7 +109,7 @@ pub fn test_skills_et_combat(player: &mut Player) {
         0,
         "GROS COUP DE BITE".to_string(),
         "Inflige des dégâts physiques à l'ennemi.".to_string(),
-        0, 10, 0, 0, 0, 0, 5, 0, 0, 0, 1, false, -1,
+        0, 10, 0, 0, 0, 0, 0, 1000, 0, 0, 0, false, -1,
     );
     let mut skill3 = skill2.clone();
     skill3.entity_id = 1;
@@ -118,14 +131,14 @@ pub fn test_skills_et_combat(player: &mut Player) {
 
     // Création des ennemis
     let ennemi1 = Entity::new(
-        1,
+        2,
         "Ennemi 1".to_string(),
-        100, 100, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 0, None,
+        2000, 2000, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 125, 2,None
     );
     let ennemi2 = Entity::new(
-        2,
+        3,
         "Ennemi 2".to_string(),
-        100, 100, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 0, None,
+        2000, 2000, 0, 0, 0, 0, 0, 0, 1,1.1, vec![], 1, 125,  2,None
     );
     let ennemies: Vec<Box<dyn HasEntity>> = vec![
         Box::new(Enemy::new(ennemi1)),

@@ -44,11 +44,44 @@ impl DatabaseManager {
         io::stdin().read_line(&mut nom)?;
         let nom = nom.trim();
         self.conn.execute(
-            "INSERT INTO player (nom,hp,mana,magic_resist,armor,attack_damage,magic_damage,speed,dodge_chance,level,xp)\
-             VALUES (?1, 30, 30, 5, 5, 10, 10, 5, 10.0,1,0)",
+            "INSERT INTO player (nom,max_hp,hp,max_mana,mana,magic_resist,armor,attack_damage,magic_damage,speed,dodge_chance,level,xp)\
+             VALUES (?1, 30, 30, 30, 30, 5, 5, 10, 10, 5, 10.0,1,0)",
             &[nom],
         )?;
         Ok(())
+    }
+
+    pub fn insert_shadow(&self, shadow: &Shadow) -> Result<(), Box<dyn std::error::Error>> {
+        let query = "SELECT COUNT(*) FROM entity WHERE id = ?1";
+        let count: i64 = self.conn.query_row(query, [shadow.entity.id], |row| row.get(0))?;
+        println!("count shadow: {:?}", count);
+        if count > 0 {
+            // Si l'ombre existe déjà, on met à jour ses informations
+            self.conn.execute(
+                "UPDATE entity SET enemy = 0 WHERE id = ?1",
+                [shadow.entity.id]
+            )?;
+            return Ok(());
+        } else {
+            self.conn.execute(
+            "INSERT INTO entity (nom, enemy, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id) \
+                     VALUES (?1, 0, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+            rusqlite::params![
+            shadow.entity.name,
+            shadow.entity.max_hp,
+            shadow.entity.hp,
+            shadow.entity.max_mana,
+            shadow.entity.mana,
+            shadow.entity.magic_resist,
+            shadow.entity.armor,
+            shadow.entity.attack_dmg,
+            shadow.entity.magic_dmg,
+            shadow.entity.speed,
+            shadow.entity.dodge_chance as f32,
+            shadow.entity.classe_id,
+            ], )?;
+            Ok(())
+        }
     }
 
     pub fn get_player_inventory_id(&self) -> Result<i32> {
@@ -415,26 +448,28 @@ impl DatabaseManager {
 
     pub fn get_player_data(&self) -> Player {
         // Récupérer les données du joueur
-        let query = "SELECT id,nom, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp FROM player";
+        let query = "SELECT id,nom ,max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp FROM player";
         let mut player: Player = self.conn.query_row(query, [], |row| {
             Ok(Player {
                 entity: crate::entities::shadow::Entity::new(
                     row.get(0)?,
                     row.get(1)?,
                     row.get(2)?,
-                    row.get(2)?,
-                    row.get(3)?,
                     row.get(3)?,
                     row.get(4)?,
                     row.get(5)?,
                     row.get(6)?,
                     row.get(7)?,
                     row.get(8)?,
-                    row.get::<_, f32>(9)?,
-                    vec![],
+                    row.get(9)?,
                     row.get(10)?,
-                    row.get(11)?,
-                    None
+                    row.get::<_, f32>(11)?,
+                    vec![],
+                    row.get(12)?,
+                    row.get(13)?,
+                    0,
+                    None,
+
                 ),
                 ombres: vec![],
             })
@@ -450,9 +485,42 @@ impl DatabaseManager {
         }
         return player;
     }
+    
+    pub(crate) fn get_ennemi_by_name(conn: &Connection, nom: &str) -> Option<Shadow> {
+        let query = "SELECT id,nom, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp ,classe_id FROM entity WHERE nom = ?1 AND enemy = true";
+        let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
+        let shadow_iter = stmt.query_map([nom], |row| {
+            Ok(Shadow {
+                entity: crate::entities::shadow::Entity::new(
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                    row.get(6)?,
+                    row.get(7)?,
+                    row.get(8)?,
+                    row.get(9)?,
+                    row.get(10)?,
+                    row.get::<_, f32>(11)?,
+                    vec![],
+                    row.get(12)?,
+                    row.get(13)?,
+                    row.get(14)?,
+                    None
+                ),
+            })
+        }).expect("Erreur lors de l'exécution de la requête");
+
+        for shadow in shadow_iter {
+            return Some(shadow.expect("Erreur lors de la récupération d'une ombre"));
+        }
+        None
+    }
 
     fn get_shadows(conn: &Connection) -> Vec<Shadow> {
-        let query = "SELECT id,nom, hp, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp FROM entity WHERE enemy = false";
+        let query = "SELECT id,nom, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp ,classe_id FROM entity WHERE enemy = false";
         let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
         let shadows_iter = stmt.query_map([], |row| {
             Ok(Shadow {
@@ -460,18 +528,19 @@ impl DatabaseManager {
                     row.get(0)?,
                     row.get(1)?,
                     row.get(2)?,
-                    row.get(2)?,
-                    row.get(3)?,
                     row.get(3)?,
                     row.get(4)?,
                     row.get(5)?,
                     row.get(6)?,
                     row.get(7)?,
                     row.get(8)?,
-                    row.get::<_, f32>(9)?,
-                    vec![],
+                    row.get(9)?,
                     row.get(10)?,
-                    row.get(11)?,
+                    row.get::<_, f32>(11)?,
+                    vec![],
+                    row.get(12)?,
+                    row.get(13)?,
+                    row.get(14)?,
                     None
                 ),
             })
