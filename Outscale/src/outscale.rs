@@ -189,11 +189,7 @@ pub fn test_les_remparts(){
         -1
     );
     let mut playerTest = Player::new(
-        Entity::new(
-            0,
-            "TestPlayer".to_string(),
-            400, 700, 10, 10, 5, 5, 1, 1, 1, 1.0, vec![], 1, 0, None,
-        ),
+        Entity::new(0, "TestPlayer".to_string(), 400, 700, 10, 10, 5, 5, 1, 1, 1, 1.0, vec![], 1, 0, 1, None),
         vec![],
     );
     playerTest.entity.skills.push(OperatorSkill);
