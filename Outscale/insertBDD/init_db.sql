@@ -45,7 +45,8 @@ CREATE TABLE IF NOT EXISTS player (
 CREATE TABLE IF NOT EXISTS entity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT DEFAULT NULL,
-    enemy BOOLEAN DEFAULT NULL, --true = ennemi, false = shadow
+    enemy BOOLEAN DEFAULT NULL,
+    used BOOLEAN DEFAULT FALSE,
     max_hp INTEGER DEFAULT NULL,
     hp INTEGER DEFAULT NULL,
     max_mana INTEGER DEFAULT NULL,
@@ -98,6 +99,7 @@ CREATE TABLE IF NOT EXISTS classe (
 CREATE TABLE IF NOT EXISTS skills (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT DEFAULT NULL,
+    discovered BOOLEAN DEFAULT FALSE, -- true = compétence découverte, false = compétence non découverte
     description TEXT DEFAULT NULL,
     hp_refound INTEGER DEFAULT NULL,
     mana_cost INTEGER DEFAULT NULL,
@@ -164,20 +166,20 @@ INSERT INTO zones (nom, description) VALUES ('Palais des Papes', 'Palais du Pape
 
 -- Insertion d'excaliburne
 INSERT INTO objet(nom, degats, armure, taux_critique, mana, vitesse, degats_magique, magic_resist, hp, type_objet) VALUES
-        ('Excaliburne', 100, 0, 0, 0, 0, 0, 0, 0, 'arme');
+        ('Excalibur', 100, 0, 0, 0, 0, 0, 0, 0, 'arme');
 
-INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
-        ('Gardien Corrompu', 1, 50,50,0, 0, 0, 0, 20, 0, 5, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'),100, 1);
+INSERT INTO entity(nom, enemy, used, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+        ('Gardien Corrompu', 1,0, 20,20,0, 0, 0, 0, 20, 0, 5, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'),100, 1);
 
 /*Zone2 Le roché des doms*/
-INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
-        ('Gardien du temple', 1, 300, 300, 300, 300, 50, 50, 65, 5, 10, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'), 50, 2);
+INSERT INTO entity(nom, enemy, used, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+        ('Gardien du temple', 1,0, 300, 300, 300, 300, 50, 50, 65, 5, 10, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'), 50, 2);
 
-INSERT INTO  entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
-        ('Le prêtre', 1, 200, 200, 500, 500, 20, 20, 30, 70, 0, 0.2, (SELECT id FROM classe WHERE nom = 'Sorcier'), 50, 2);
+INSERT INTO  entity(nom, enemy, used, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+        ('Le prêtre', 1,0, 200, 200, 500, 500, 20, 20, 30, 70, 0, 0.2, (SELECT id FROM classe WHERE nom = 'Sorcier'), 50, 2);
 
-INSERT INTO  entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
-    ('L`imame', 1, 200, 200, 500, 500, 20, 20, 30, 70, 0, 0.2, (SELECT id FROM classe WHERE nom = 'Sorcier'), 50, 2);
+INSERT INTO  entity(nom, enemy, used,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+    ('L`imame', 1,0, 200, 200, 500, 500, 20, 20, 30, 70, 0, 0.2, (SELECT id FROM classe WHERE nom = 'Sorcier'), 50, 2);
 
 INSERT INTO skills (name, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) VALUES
     ('Gros cout de massue', 'Inflige de lourds dégâts physiques à l`ennemi.', 0, 50, 0, 0, 0, 0, 0, 100, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Gardien du temple'), NULL),
@@ -185,20 +187,58 @@ INSERT INTO skills (name, description, hp_refound, mana_cost, mana_refound, magi
     ('Bouclier magique', 'Augmente la résistance magique de l`entité.', 0, 40, 0, 0, 20, 0, 0, 0, 0, 0,0, FALSE, (SELECT id FROM entity WHERE nom = 'Le prêtre'), NULL);
 
 /*Zone4 Le mont favé*/
-INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
-    ('Le dragon noir', 1, 1000, 1000, 300, 300, 150, 150, 90, 100, 150, 0.1, (SELECT id FROM classe WHERE nom = 'Drake'), 300, 10);
+INSERT INTO entity(nom, enemy, used,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+    ('Le dragon noir', 1,0, 1000, 1000, 300, 300, 150, 150, 90, 100, 150, 0.1, (SELECT id FROM classe WHERE nom = 'Drake'), 300, 10);
 
 INSERT INTO skills (name, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) VALUES
-    ('Souffle de feu', 'Inflige de lourds dégâts magiques à tous les ennemis.', 0, 100, 0, 0, 0, 0, 0, 70, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Le dragon noir'), NULL),
+    ('Souffle de mafé', 'Inflige de lourds dégâts magiques à tous les ennemis.', 0, 100, 0, 0, 0, 0, 0, 70, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Le dragon noir'), NULL),
     ('Charge du dragon', 'Inflige des dégâts physiques à l`ennemi et le repousse.', 0, 80, 0, 0, 0, 0, 0, 50, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Le dragon noir'), NULL),
     ('Grosse carapace', 'Soigne une partie des points de vie du dragon.', 200, 50, 0, 0, 10, 0, 10, 0, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Le dragon noir'), NULL);
 
 /*Zone5 palais des papes*/
-
-INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
-    ('Pape corrompu', 1, 1500, 1500, 500, 500, 200, 200, 120, 150, 100, 0.1, (SELECT id FROM classe WHERE nom = 'Sorcier'), 300, 15);
+INSERT INTO entity(nom, enemy, used, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
+    ('Pape corrompu', 1,0, 1500, 1500, 500, 500, 200, 200, 120, 150, 100, 0.1, (SELECT id FROM classe WHERE nom = 'Sorcier'), 300, 15);
 
 INSERT INTO skills (name, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) VALUES
     ('Foudre divine', 'Inflige de lourds dégâts magiques à l`ennemi.', 0, 120, 0, 0, 0, 0, 0, 30, 0, 60, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Pape corrompu'), NULL),
     ('Bénédiction du pape', 'Soigne une partie des points de vie de l`entité et augmente sa résistance magique.', 200, 0, 200, 20, 0, 0, 0, 0, 0, 0,0, TRUE, (SELECT id FROM entity WHERE nom = 'Pape corrompu'), NULL),
     ('Châtiment divin', 'Inflige des dégâts magiques à tous les ennemis et réduit leur armure.', 0, 150, 0, -30, 0, -30, 0, 50, 0, 50,0, FALSE, (SELECT id FROM entity WHERE nom = 'Pape corrompu'), NULL);
+
+
+INSERT INTO skills (name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) VALUES
+    ('Coup de pied', true,'Inflige des dégâts physiques à l`ennemi.', 0, 20, 0, 0, 0, 0, 0, 30, 0, 0, 0, FALSE, NULL, NULL),
+    ('Soin rapide', true,'Soigne une partie des points de vie de l`entité.', 50, 10, 0, 0, 5, 0, 5, 0, 5, 0, 5, TRUE, NULL, NULL),
+    ('Bouclier de protection', true,'Augmente la résistance magique de l`entité.', 0, 15, 0, 0, 10, 0, 0, 0, 0, 0,0, FALSE, NULL, NULL),
+    ('Charge', true,'Inflige des dégâts physiques à l`ennemi et augmente la vitesse de l`entité.', 0, 30, 0, 0, 0, 0, 0, 50, 0, 0, 20, FALSE, NULL, 1);
+
+/*Randon 30 skills to collect*/
+INSERT INTO skills (name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) VALUES
+    ('Coup de bouclier', 0, 'Inflige des dégâts physiques à l`ennemi et le repousse.', 0, 30, 0, 0, 0, 0, 0, 40, 0, 0, 0, FALSE, NULL, NULL),
+    ('Charge héroïque',0, 'Inflige des dégâts physiques à l`ennemi et augmente la vitesse de l`entité.', 0, 50, 0, 0, 0, 0, 0, 60, 0, 0, 20, FALSE, NULL, NULL),
+    ('Frappe rapide', 0,'Inflige des dégâts physiques à l`ennemi avec une chance de coup critique.', 0, 25, 0, 0, 0, 10, 0, 50, 20, 0, 10, FALSE, NULL, NULL),
+    ('Soin puissant', 0,'Soigne une partie importante des points de vie de l`entité.', 200, 40, 0, 0, 10, 0, 10, 0, 10, 0 ,10 , TRUE , NULL , NULL),
+    ('Bouclier magique',0, 'Augmente la résistance magique de l`entité pour un court laps de temps.', 0 ,30 ,0 ,20 ,20 ,0 ,0 ,0 ,0 ,20 ,20 , FALSE , NULL , NULL),
+    ('Attaque tourbillonnante', 0,'Inflige des dégâts physiques à tous les ennemis proches.', 50 ,60 ,0 ,10 ,10 ,10 ,10 ,70 ,30 ,30 ,30 , FALSE , NULL , NULL),
+    ('Rage du guerrier', 0,'Augmente les dégâts d`attaque de l`entité pendant un court laps de temps.', -50 ,80 ,50 ,-20 ,-20 ,-20 ,-20 ,-100 ,-50 ,-50 ,-50 ,- FALSE ,- NULL ,NULL),
+    ('Coup de grâce', 0,'Inflige des dégâts massifs à l`ennemi, mais coûte beaucoup de mana.', 0, 100, 0, 0, 0, 0, 0, 150, 0, 0, 0, FALSE, NULL, NULL),
+    ('Saut héroïque', 0,'Permet à l`entité de sauter sur un ennemi et d`infliger des dégâts.', 0, 40, 0, 0, 0, 0, 0, 80, 0, 0, 20, FALSE, NULL, NULL),
+    ('Provocation', 0,'Force les ennemis à attaquer l`entité pendant un court laps de temps.', -50 ,20 ,0 ,30 ,30 ,30 ,30 ,0 ,0 ,0 ,0 , TRUE , NULL , NULL),
+    ('Coup de tonnerre', 0,'Inflige des dégâts magiques à tous les ennemis proches.', 0 ,70 ,0 ,10 ,10 ,10 ,10 ,60 ,20 ,40 ,20 , FALSE , NULL , NULL),
+    ('Soin en chaîne', 0,'Soigne une partie des points de vie de l`entité et de ses alliés proches.', -100 ,50 ,100 ,-10 ,-10 ,-10 ,-10 ,-50 ,-20 ,-20 ,-20 ,- TRUE ,- NULL ,NULL),
+    ('Frappe du vent',0, 'Inflige des dégâts physiques à l`ennemi et augmente la vitesse de l`entité.', -50 ,30 ,0 ,-10 ,-10 ,-10 ,-10 ,-40 ,-20 ,-20 ,-20 ,- FALSE ,- NULL ,NULL),
+    ('Bouclier d`énergie', 0,'Augmente la résistance magique de l`entité pour un court laps de temps.', -50 ,40 ,50 ,20 ,20 ,0 ,0 ,0 ,0 ,20 ,20 , FALSE ,- NULL ,NULL),
+    ('Coup de pied sauté', 0,'Inflige des dégâts physiques à l`ennemi et le repousse.', -30 ,30 ,0 ,-10 ,-10 ,-10 ,-10 ,-40 ,-20 ,-20 ,-20 ,- FALSE ,- NULL ,NULL),
+    ('Charge de la tempête', 0,'Inflige des dégâts physiques à l`ennemi et augmente la vitesse de l`entité.', -50 ,50 ,0 ,-10 ,-10 ,-10 ,-10 ,-60 ,-30 ,-30 ,-30 ,- FALSE ,- NULL ,NULL),
+    ('Frappe de feu', 0,'Inflige des dégâts magiques à l`ennemi et le brûle pendant un court laps de temps.', 0 ,60 ,0 ,10 ,10 ,0 ,0 ,70 ,20 ,40 ,20 , FALSE ,- NULL ,NULL),
+    ('Soin régénérateur', 0,'Soigne une partie des points de vie de l`entité sur la durée.', -100 ,50 ,100 ,0 ,0 ,0 ,0 ,50 ,20 ,20 ,20 , TRUE ,- NULL ,NULL),
+    ('Coup de bouclier renforcé', 0,'Inflige des dégâts physiques à l`ennemi et augmente la défense de l`entité.', -50 ,40 ,0 ,-20 ,-20 ,-20 ,-20 ,-80 ,-40 ,-40 ,-40 ,- FALSE ,- NULL ,NULL),
+    ('Attaque en rafale', 0,'Inflige plusieurs coups rapides à l`ennemi.', 0, 70, 0, 0, 0, 30, 0, 80, 30, 0, 10, FALSE, NULL, NULL),
+    ('Saut d`attaque', 0,'Permet à l`entité de sauter sur un ennemi et d`infliger des dégâts.', 0, 40, 0, 0, 0, 0, 0, 70, 0, 0, 20, FALSE, NULL, NULL),
+    ('Provocation renforcée', 0,'Force les ennemis à attaquer l`entité pendant un court laps de temps et augmente sa défense.', -50 ,30 ,0 ,40 ,40 ,40 ,40 ,0 ,0 ,0 ,0 , TRUE , NULL , NULL),
+    ('Coup de tonnerre puissant', 0,'Inflige des dégâts magiques à tous les ennemis proches et les étourdit.', 0 ,80 ,0 ,20 ,20 ,20 ,20 ,70 ,30 ,50 ,30 , FALSE , NULL , NULL),
+    ('Soin en chaîne amélioré', 0,'Soigne une partie des points de vie de l`entité et de ses alliés proches sur la durée.', -150 ,60 ,150 ,-20 ,-20 ,-20 ,-20 ,-60 ,-30 ,-30 ,-30 ,- TRUE ,- NULL ,NULL),
+    ('Frappe du vent renforcée', 0,'Inflige des dégâts physiques à l`ennemi et augmente la vitesse de l`entité.', -100 ,40 ,0 ,-20 ,-20 ,-20 ,-20 ,-50 ,-30 ,-30 ,-30 ,- FALSE ,- NULL ,NULL),
+    ('Bouclier d`énergie renforcé', 0,'Augmente la résistance magique de l`entité pour un court laps de temps et réduit les dégâts subis.', -100 ,50 ,100 ,30 ,30 ,0 ,0 ,0 ,0 ,30 ,30 , FALSE ,- NULL ,NULL);
+
+
+

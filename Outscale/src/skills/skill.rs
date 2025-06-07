@@ -5,6 +5,7 @@ use crate::entities::entity::Entity;
 pub struct Skill {
     pub id: i32,
     pub name: String,
+    pub discovered: bool,
     pub description: String,
     pub hp_refound: i32,
     pub mana_cost: i32,
@@ -18,13 +19,15 @@ pub struct Skill {
     pub magic_dmg: i32,
     pub magic_dmg_buff: i32,
     pub for_allies: bool,
-    pub entity_id: i32, // -1 pour le joueur
+    pub entity_id: i32,
+    pub player_id: i32,
 }
 
 impl Skill {
     pub fn new(
          id : i32,
          name: String,
+         discovered: bool,
          description: String,
          hp_refound: i32,
          mana_cost: i32,
@@ -39,10 +42,12 @@ impl Skill {
          magic_dmg_buff: i32,
          for_allies: bool,
          entity_id: i32,
+         player_id: i32,
     ) -> Self {
         Skill {
             id: 0,
             name,
+            discovered,
             description,
             hp_refound,
             mana_cost,
@@ -57,6 +62,7 @@ impl Skill {
             magic_dmg_buff,
             for_allies,
             entity_id,
+            player_id,
         }
     }
     pub fn calculate_damage(&self, caster: &Entity, target: &Entity) -> i32 {

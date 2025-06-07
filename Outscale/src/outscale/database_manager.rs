@@ -477,11 +477,11 @@ impl DatabaseManager {
 
         player.entity.inventaire = Self::get_player_inventory(&self);
         player.ombres = Self::get_shadows(&self.conn);
-        player.entity.skills = Self::get_skills_by_entity_id(&self.conn, -1);
+        player.entity.skills = Self::get_skills_by_entity_id(&self.conn, 1,1);
         for ombre in player.ombres.iter_mut() {
             ombre.entity.inventaire = Self::get_inventaire_by_id_entity(&self, ombre.entity.id).ok();
             println!("ombre: {:?}", ombre.entity.id);
-            ombre.entity.skills = Self::get_skills_by_entity_id(&self.conn, ombre.entity.id);
+            ombre.entity.skills = Self::get_skills_by_entity_id(&self.conn, ombre.entity.id, 0);
         }
         return player;
     }
@@ -571,16 +571,18 @@ impl DatabaseManager {
             } 
         }
         for skill in skill_a_inserer {
+            println!("INSERTION DU SKILL d'ID {}", skill.id);
             Self::inserer_skills(&conn, skill);
         }
     }
 
     fn inserer_skills(conn: &Connection, skill: Skill) {
         conn.execute(
-            "INSERT INTO skills (name,description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, entity_id) \
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
+            "INSERT INTO skills (name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) \
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)",
             rusqlite::params![
             skill.name,
+            skill.discovered,
             skill.description,
             skill.hp_refound,
             skill.mana_cost,
@@ -593,39 +595,132 @@ impl DatabaseManager {
             skill.attack_dmg_buff,
             skill.magic_dmg,
             skill.magic_dmg_buff,
+            skill.for_allies,
             skill.entity_id,
+            skill.player_id
         ],
         ).expect("Erreur lors de l'insertion du skill dans la base de données");
     }
 
-    fn get_skills_by_entity_id(conn: &Connection, entity_id: i32) -> Vec<Skill> {
-        let query = "SELECT * FROM skills WHERE entity_id = ?1";
-        let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
-        let skills_iter = stmt.query_map([entity_id], |row| {
+
+   fn get_skills_by_entity_id(conn: &Connection, entity_id: i32, player_id: i32) -> Vec<Skill> {
+       let query: &str;
+       let params: Vec<&dyn rusqlite::ToSql>; // Utilisez un vecteur pour stocker les références
+
+       if player_id == 1 {
+           query = "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id FROM skills WHERE player_id = 1";
+           params = vec![]; // Pas de paramètres nécessaires
+       } else {
+           query = "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id FROM skills WHERE entity_id = ?1";
+           params = vec![&entity_id]; // Stockez la référence dans un vecteur
+       }
+
+       let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
+       let skills_iter = stmt.query_map(&*params, |row| {
+           Ok(Skill {
+               id: row.get(0)?,
+               name: row.get(1)?,
+               discovered: row.get(2)?,
+               description: row.get(3)?,
+               hp_refound: row.get(4)?,
+               mana_cost: row.get(5)?,
+               mana_refound: row.get(6)?,
+               magic_resist_debuff: row.get(7)?,
+               magic_resist_buff: row.get(8)?,
+               armor_debuff: row.get(9)?,
+               armor_buff: row.get(10)?,
+               attack_dmg: row.get(11)?,
+               attack_dmg_buff: row.get(12)?,
+               magic_dmg: row.get(13)?,
+               magic_dmg_buff: row.get(14)?,
+               for_allies: row.get(15)?,
+               entity_id: row.get(16)?,
+               player_id: row.get(17)?,
+           })
+       }).expect("Erreur lors de l'exécution de la requête");
+
+       let mut skills = Vec::new();
+       for skill in skills_iter {
+           if let Ok(skill) = skill {
+               skills.push(skill);
+           }
+       }
+       skills
+   }
+    pub fn equip_skill(&self, player: &mut Player, skill_id: i32) -> Result<()> {
+        // Vérifier si le joueur a moins de 3 compétences
+        if player.entity.skills.len() >= 3 {
+            println!("Vous ne pouvez pas équiper plus de 3 compétences !");
+            return Ok(());
+        }
+
+        // Récupérer la compétence depuis la base de données
+        let query = "SELECT * FROM skills WHERE id = ?1";
+        let mut stmt = self.conn.prepare(query)?;
+        let skill = stmt.query_row([skill_id], |row| {
             Ok(Skill {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                description: row.get(2)?,
-                hp_refound: row.get(3)?,
-                mana_cost: row.get(4)?,
-                mana_refound: row.get(5)?,
-                magic_resist_debuff: row.get(6)?,
-                magic_resist_buff: row.get(7)?,
-                armor_debuff: row.get(8)?,
-                armor_buff: row.get(9)?,
-                attack_dmg: row.get(10)?,
-                attack_dmg_buff: row.get(11)?,
-                magic_dmg: row.get(12)?,
-                magic_dmg_buff: row.get(13)?,
-                for_allies: row.get(14)?,
-                entity_id: row.get(15)?
+                discovered: row.get(2)?,
+                description: row.get(3)?,
+                hp_refound: row.get(4)?,
+                mana_cost: row.get(5)?,
+                mana_refound: row.get(6)?,
+                magic_resist_debuff: row.get(7)?,
+                magic_resist_buff: row.get(8)?,
+                armor_debuff: row.get(9)?,
+                armor_buff: row.get(10)?,
+                attack_dmg: row.get(11)?,
+                attack_dmg_buff: row.get(12)?,
+                magic_dmg: row.get(13)?,
+                magic_dmg_buff: row.get(14)?,
+                for_allies: row.get(15)?,
+                entity_id: row.get(16)?,
+                player_id: row.get(17)?,
             })
-        }).expect("Erreur lors de l'exécution de la requête");
-        let mut skills: Vec<Skill> = Vec::new();
-        for skill in skills_iter {
-            skills.push(skill.expect("Erreur lors de la récupération d'une compétence"));
+        })?;
+
+        // Copier la compétence et l'affecter au joueur
+        let mut player_skill = skill.clone();
+        player_skill.player_id=1;
+        player.entity.skills.push(player_skill);
+
+        // Mettre à jour la base de données
+        self.conn.execute(
+            "UPDATE skills SET entity_id = -1 WHERE id = ?1",
+            [skill_id]
+        )?;
+
+        Ok(())
+    }
+    
+    pub fn unequip_skill(&self, player: &mut Player, skill_index: usize) -> Result<()> {
+        if skill_index >= player.entity.skills.len() {
+            println!("Index de compétence invalide !");
+            return Ok(());
         }
-        skills
+    
+        // Récupérer l'ID de la compétence à retirer
+        let skill_id = player.entity.skills[skill_index].id;
+    
+        // Retirer la compétence du joueur
+        player.entity.skills.remove(skill_index);
+    
+        // Mettre à jour la base de données
+        self.conn.execute(
+            "UPDATE skills SET entity_id = NULL WHERE id = ?1",
+            [skill_id]
+        )?;
+    
+        Ok(())
+    }
+    
+    pub fn discover_skill(&self, skill_id: i32) -> Result<()> {
+        self.conn.execute(
+            "UPDATE skills SET discovered = 1 WHERE id = ?1",
+            [skill_id]
+        )?;
+        Ok(())
     }
     
 }

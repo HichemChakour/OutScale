@@ -120,6 +120,7 @@ mod tests {
             vec![],
             1,
             1,
+            1,
             Some(inventaire),
         );
 
