@@ -87,11 +87,12 @@ pub fn redaction_histoire(fichier: &str) {
 
 pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle: &str, player: &mut Player) {
     println!("Vous êtes actuellement dans la zone : {}. Que comptez vous faire ?", zone_actuelle);
+    println!("m. Aller quelque part");
     println!("i. Ouvrir l'inventaire de vos personnages");
-    println!("j. Ouvrir le journal");
+    //println!("j. Ouvrir le journal");
     println!("s. Ouvrir l'inventaire des Ombres");
     println!("c. Voir tout les lieux visités");
-    println!("indice. Avoir un indice");
+    //println!("indice. Avoir un indice");
     println!("q. Quitter le jeu");
 
     let choix = demander_au_joueur("Votre choix : ");
@@ -123,9 +124,19 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle: &str, player:
             db_manager.sauvegarde(player.clone());
             std::process::exit(0);
         },
-        "Les Remparts" | "Rocher des Doms" | "MontFavé" | "Palais des Papes" | "AvignAura" => {
-            // Retourne le contrôle à boucle_ville
-            // Ne relance pas le menu ici
+        "m" => {
+            /*let zone = demander_au_joueur("Vers quelle zone voulez-vous aller ? : ");
+            match zone.as_str() {
+                "Les Remparts" | "Rocher des Doms" | "MontFavé" | "Palais des Papes" | "AvignAura" => {
+                    // Laisse le menu_principal se terminer et boucle_ville traitera la zone
+                    return;
+                }
+                _ => {
+                    println!("Zone inconnue ou inaccessible.");
+                    menu_principal(db_manager, zone_actuelle, player);
+                }
+            }*/
+            return;
         }
         _ => {
             println!("Choix invalide. Veuillez réessayer.");
