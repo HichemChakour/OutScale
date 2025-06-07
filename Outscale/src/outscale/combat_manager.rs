@@ -9,6 +9,7 @@ pub struct CombatManager {
     pub allies: Vec<Box<dyn HasEntity>>,
     pub enemies: Vec<Box<dyn HasEntity>>,
     pub turn_order: Vec<Box<dyn HasEntity>>,
+    allies_sans_stat_inventaire: Vec<Box<dyn HasEntity>>,
 }
 
 #[derive(Debug)]
@@ -24,6 +25,7 @@ impl CombatManager {
             allies,
             enemies,
             turn_order: Vec::new(),
+            allies_sans_stat_inventaire: Vec::new(),
         }
     }
 
@@ -299,7 +301,7 @@ impl CombatManager {
     pub fn start_combat_loop(&mut self) {
         println!("Le combat commence !");
         let defeated_enemies = self.enemies.clone();
-
+        self.rajout_stat_objets();
         while !self.allies.is_empty() && !self.enemies.is_empty() {
             self.determine_turn_order();
 
@@ -347,5 +349,46 @@ impl CombatManager {
             use crate::outscale::extraction_manager::ExtractionManager;
             ExtractionManager::offer_extraction(&defeated_enemies);
         }
+        self.retire_stat_objets();
     }
+
+    pub(crate) fn rajout_stat_objets(&mut self) {
+        self.allies_sans_stat_inventaire.clear();
+
+        for ally in &mut self.allies {
+            // Sauvegarde l'état original
+            self.allies_sans_stat_inventaire.push(ally.clone());
+
+            // Clone l'inventaire AVANT toute modification
+            let inventaire_opt = ally.entity().inventaire.clone();
+            if let Some(inventaire) = inventaire_opt {
+                let objets = [inventaire.tete, inventaire.jambes, inventaire.torse, inventaire.main1, inventaire.main2];
+                let entity_mut = ally.entity_mut();
+                for objet in &objets {
+                    entity_mut.attack_dmg += objet.degats;
+                    entity_mut.magic_dmg += objet.magic_resist;
+                    entity_mut.armor += objet.armure;
+                    entity_mut.magic_resist += objet.magic_resist;
+                    entity_mut.hp += objet.hp;
+                    entity_mut.hp += objet.mana;
+                    entity_mut.speed += objet.vitesse;
+                }
+            }
+        }
+        
+    }
+
+    pub(crate) fn retire_stat_objets(&mut self) {
+        if self.allies_sans_stat_inventaire.len() != self.allies.len() {
+            println!("Impossible de restaurer les stats : sauvegarde incohérente.");
+            return;
+        }
+        for (ally, original) in self.allies.iter_mut().zip(self.allies_sans_stat_inventaire.iter()) {
+            // Remplace l'entité actuelle par la sauvegarde originale
+            let original_entity = original.entity().clone();
+            let entity_mut = ally.entity_mut();
+            *entity_mut = original_entity;
+        }
+    }
+
 }

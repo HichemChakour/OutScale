@@ -4,6 +4,7 @@ use crate::entities::entity::Entity;
 pub struct Skill {
     pub id: i32,
     pub name: String,
+    pub discovered: bool,
     pub description: String,
     pub hp_refound: i32,
     pub mana_cost: i32,
@@ -24,6 +25,7 @@ impl Skill {
     pub fn new(
          id : i32,
          name: String,
+         discovered: bool,
          description: String,
          hp_refound: i32,
          mana_cost: i32,
@@ -42,6 +44,7 @@ impl Skill {
         Skill {
             id: 0,
             name,
+            discovered,
             description,
             hp_refound,
             mana_cost,

@@ -1,4 +1,4 @@
-use crate::skills::object::Objet;
+pub(crate) use crate::skills::object::Objet;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Inventaire {
