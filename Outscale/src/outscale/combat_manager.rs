@@ -10,6 +10,7 @@ pub struct CombatManager {
     pub enemies: Vec<Box<dyn HasEntity>>,
     pub turn_order: Vec<Box<dyn HasEntity>>,
     allies_sans_stat_inventaire: Vec<Box<dyn HasEntity>>,
+    pub victory: bool,
 }
 
 #[derive(Debug)]
@@ -26,6 +27,7 @@ impl CombatManager {
             enemies,
             turn_order: Vec::new(),
             allies_sans_stat_inventaire: Vec::new(),
+            victory: false,
         }
     }
 
@@ -332,8 +334,10 @@ impl CombatManager {
 
         // Déterminer le vainqueur
         if self.allies.is_empty() {
+            self.victory = false;
             println!("Les ennemis ont gagné !");
         } else {
+            self.victory = true;
             println!("Les alliés ont gagné !");
 
             // Distribution de l'XP aux alliés

@@ -1,6 +1,7 @@
+use serde::Deserialize;
 use crate::entities::entity::Entity;
 
-#[derive(Debug, Clone,PartialEq)]
+#[derive(Debug, Clone,PartialEq,Deserialize)]
 pub struct Skill {
     pub id: i32,
     pub name: String,
