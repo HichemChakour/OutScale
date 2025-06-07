@@ -354,7 +354,8 @@ fn get_discovered_skills(db_manager: &DatabaseManager) -> Vec<Skill> {
             magic_dmg: row.get(13)?,
             magic_dmg_buff: row.get(14)?,
             for_allies: row.get(15)?,
-            entity_id: row.get::<_, Option<i32>>(16)?.unwrap_or(-1)  // Utilisation de unwrap_or pour gérer les valeurs NULL
+            entity_id: row.get::<_, Option<i32>>(16)?.unwrap_or(-1),
+            player_id: row.get::<_, Option<i32>>(17)?.unwrap_or(-1),
         })
     }).expect("Erreur lors de l'exécution de la requête");
 

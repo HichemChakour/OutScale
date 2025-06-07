@@ -75,11 +75,10 @@ pub fn run() {
     }
 
     let mut player_mut = player;
-    let zone_initiale = "AvignAura"; // Zone de départ par défaut
+    let zone_initiale = "AvignAura";
 
     // Marquer la zone comme visitée
     db_manager.visite_lieu(zone_initiale);
-
     // Lancer le menu principal
     use crate::outscale::cli_manager::menu_principal;
     menu_principal(&db_manager, zone_initiale, &mut player_mut);

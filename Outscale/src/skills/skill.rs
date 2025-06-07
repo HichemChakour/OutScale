@@ -18,7 +18,8 @@ pub struct Skill {
     pub magic_dmg: i32,
     pub magic_dmg_buff: i32,
     pub for_allies: bool,
-    pub entity_id: i32, // -1 pour le joueur
+    pub entity_id: i32,
+    pub player_id: i32,
 }
 
 impl Skill {
@@ -40,6 +41,7 @@ impl Skill {
          magic_dmg_buff: i32,
          for_allies: bool,
          entity_id: i32,
+         player_id: i32,
     ) -> Self {
         Skill {
             id: 0,
@@ -59,6 +61,7 @@ impl Skill {
             magic_dmg_buff,
             for_allies,
             entity_id,
+            player_id,
         }
     }
     pub fn calculate_damage(&self, caster: &Entity, target: &Entity) -> i32 {

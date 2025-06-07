@@ -571,14 +571,15 @@ impl DatabaseManager {
             } 
         }
         for skill in skill_a_inserer {
+            println!("INSERTION DU SKILL d'ID {}", skill.id);
             Self::inserer_skills(&conn, skill);
         }
     }
 
     fn inserer_skills(conn: &Connection, skill: Skill) {
         conn.execute(
-            "INSERT INTO skills (name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id) \
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)",
+            "INSERT INTO skills (name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) \
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)",
             rusqlite::params![
             skill.name,
             skill.discovered,
@@ -596,49 +597,56 @@ impl DatabaseManager {
             skill.magic_dmg_buff,
             skill.for_allies,
             skill.entity_id,
+            skill.player_id
         ],
         ).expect("Erreur lors de l'insertion du skill dans la base de données");
     }
 
-    
-    fn get_skills_by_entity_id(conn: &Connection, entity_id: i32, player_id : i32) -> Vec<Skill> {
-        let mut query : &str;
-        if( player_id == 1) {
-            query = "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id FROM skills WHERE player_id = 1";
-        } else {
-            query = "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id FROM skills WHERE entity_id = ?1";
-        }
-        let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
-        let skills_iter = stmt.query_map([entity_id], |row| {
-            Ok(Skill {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                discovered: row.get(2)?,
-                description: row.get(3)?,
-                hp_refound: row.get(4)?,
-                mana_cost: row.get(5)?,
-                mana_refound: row.get(6)?,
-                magic_resist_debuff: row.get(7)?,
-                magic_resist_buff: row.get(8)?,
-                armor_debuff: row.get(9)?,
-                armor_buff: row.get(10)?,
-                attack_dmg: row.get(11)?,
-                attack_dmg_buff: row.get(12)?,
-                magic_dmg: row.get(13)?,
-                magic_dmg_buff: row.get(14)?,
-                for_allies: row.get(15)?,
-                entity_id: row.get(16)?
-            })
-        }).expect("Erreur lors de l'exécution de la requête");
 
-        let mut skills = Vec::new();
-        for skill in skills_iter {
-            if let Ok(skill) = skill {
-                skills.push(skill);
-            }
-        }
-        skills
-    }
+   fn get_skills_by_entity_id(conn: &Connection, entity_id: i32, player_id: i32) -> Vec<Skill> {
+       let query: &str;
+       let params: Vec<&dyn rusqlite::ToSql>; // Utilisez un vecteur pour stocker les références
+
+       if player_id == 1 {
+           query = "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id FROM skills WHERE player_id = 1";
+           params = vec![]; // Pas de paramètres nécessaires
+       } else {
+           query = "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id FROM skills WHERE entity_id = ?1";
+           params = vec![&entity_id]; // Stockez la référence dans un vecteur
+       }
+
+       let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
+       let skills_iter = stmt.query_map(&*params, |row| {
+           Ok(Skill {
+               id: row.get(0)?,
+               name: row.get(1)?,
+               discovered: row.get(2)?,
+               description: row.get(3)?,
+               hp_refound: row.get(4)?,
+               mana_cost: row.get(5)?,
+               mana_refound: row.get(6)?,
+               magic_resist_debuff: row.get(7)?,
+               magic_resist_buff: row.get(8)?,
+               armor_debuff: row.get(9)?,
+               armor_buff: row.get(10)?,
+               attack_dmg: row.get(11)?,
+               attack_dmg_buff: row.get(12)?,
+               magic_dmg: row.get(13)?,
+               magic_dmg_buff: row.get(14)?,
+               for_allies: row.get(15)?,
+               entity_id: row.get(16)?,
+               player_id: row.get(17)?,
+           })
+       }).expect("Erreur lors de l'exécution de la requête");
+
+       let mut skills = Vec::new();
+       for skill in skills_iter {
+           if let Ok(skill) = skill {
+               skills.push(skill);
+           }
+       }
+       skills
+   }
     pub fn equip_skill(&self, player: &mut Player, skill_id: i32) -> Result<()> {
         // Vérifier si le joueur a moins de 3 compétences
         if player.entity.skills.len() >= 3 {
@@ -667,13 +675,14 @@ impl DatabaseManager {
                 magic_dmg: row.get(13)?,
                 magic_dmg_buff: row.get(14)?,
                 for_allies: row.get(15)?,
-                entity_id: row.get(16)?
+                entity_id: row.get(16)?,
+                player_id: row.get(17)?,
             })
         })?;
 
         // Copier la compétence et l'affecter au joueur
         let mut player_skill = skill.clone();
-        player_skill.entity_id = -1; // ID du joueur
+        player_skill.player_id=1;
         player.entity.skills.push(player_skill);
 
         // Mettre à jour la base de données
