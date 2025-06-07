@@ -43,15 +43,29 @@ fn boucle_ville(db_manager: &DatabaseManager, player: &mut Player) {
     }
 }
 
-fn boucle_remparts(db_manager: &DatabaseManager, player: &mut Player) {
+fn boucle_remparts(_db_manager: &DatabaseManager, player: &mut Player) {
     cli_manager::redaction_histoire("src/resources/dialogue/Remparts.txt");
 
     loop {
-        let enemy = Enemy::new(Entity::new(1, "Gobelin".to_string(), 30, 30, 0, 0, 10, 0, 5, 0, 1, 0.0, vec![], 1, 0, None));
-        let mut cm = CombatManager::new(
-            create_allies(player),
-            vec![Box::new(enemy)],
-        );
+        let enemy = Enemy::new(Entity::new(
+            1,
+            "Gobelin".to_string(),
+            30,
+            30,
+            0,
+            0,
+            10,
+            0,
+            5,
+            0,
+            1,
+            0.0,
+            vec![],
+            1,
+            0,
+            None,
+        ));
+        let mut cm = CombatManager::new(create_allies(player), vec![Box::new(enemy)]);
 
         cm.start_combat_loop();
         if cm.allies.is_empty() {
@@ -69,16 +83,30 @@ fn boucle_remparts(db_manager: &DatabaseManager, player: &mut Player) {
     }
 }
 
-fn boucle_rocher(db_manager: &DatabaseManager, player: &mut Player) {
+fn boucle_rocher(_db_manager: &DatabaseManager, player: &mut Player) {
     cli_manager::redaction_histoire("src/resources/dialogue/Rocher.txt");
     let mut compteur = 0;
 
     loop {
-        let enemy = Enemy::new(Entity::new(1, "Chien Maudit".to_string(), 50, 30, 5, 5, 15, 0, 5, 0, 2, 0.05, vec![], 1, 0, None));
-        let mut cm = CombatManager::new(
-            create_allies(player),
-            vec![Box::new(enemy)],
-        );
+        let enemy = Enemy::new(Entity::new(
+            1,
+            "Chien Maudit".to_string(),
+            50,
+            30,
+            5,
+            5,
+            15,
+            0,
+            5,
+            0,
+            2,
+            0.05,
+            vec![],
+            1,
+            0,
+            None,
+        ));
+        let mut cm = CombatManager::new(create_allies(player), vec![Box::new(enemy)]);
 
         cm.start_combat_loop();
         if cm.allies.is_empty() {
@@ -102,14 +130,28 @@ fn boucle_rocher(db_manager: &DatabaseManager, player: &mut Player) {
     }
 }
 
-fn boucle_mont_favet(db_manager: &DatabaseManager, player: &mut Player) {
+fn boucle_mont_favet(_db_manager: &DatabaseManager, player: &mut Player) {
     cli_manager::redaction_histoire("src/resources/dialogue/MF.txt");
 
-    let enemy = Enemy::new(Entity::new(1, "Dragon".to_string(), 120, 80, 10, 10, 25, 20, 5, 0.1, 5, 0.1, vec![], 1, 0, None));
-    let mut cm = CombatManager::new(
-        create_allies(player),
-        vec![Box::new(enemy)],
-    );
+    let enemy = Enemy::new(Entity::new(
+        1,
+        "Dragon".to_string(),
+        120,
+        80,
+        10,
+        10,
+        25,
+        20,
+        30,
+        20,
+        5,
+        0.1,
+        vec![],
+        1,
+        0,
+        None,
+    ));
+    let mut cm = CombatManager::new(create_allies(player), vec![Box::new(enemy)]);
 
     cm.start_combat_loop();
     if cm.allies.is_empty() {
@@ -124,14 +166,28 @@ fn boucle_mont_favet(db_manager: &DatabaseManager, player: &mut Player) {
     }
 }
 
-fn boucle_palais(db_manager: &DatabaseManager, player: &mut Player) {
+fn boucle_palais(_db_manager: &DatabaseManager, player: &mut Player) {
     cli_manager::redaction_histoire("src/resources/dialogue/PP_Dragon.txt");
 
-    let enemy = Enemy::new(Entity::new(1, "Pape".to_string(), 180, 100, 20, 20, 35, 35, 5, 0.1, 7, 0.05, vec![], 1, 0, None));
-    let mut cm = CombatManager::new(
-        create_allies(player),
-        vec![Box::new(enemy)],
-    );
+    let enemy = Enemy::new(Entity::new(
+        1,
+        "Pape".to_string(),
+        180,
+        100,
+        20,
+        20,
+        35,
+        35,
+        40,
+        30,
+        7,
+        0.05,
+        vec![],
+        1,
+        0,
+        None,
+    ));
+    let mut cm = CombatManager::new(create_allies(player), vec![Box::new(enemy)]);
 
     cm.start_combat_loop();
     if cm.allies.is_empty() {

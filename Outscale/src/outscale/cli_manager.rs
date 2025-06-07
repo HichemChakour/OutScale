@@ -11,7 +11,7 @@ use crossterm::{
     execute,
     terminal::{ClearType, Clear},
 };
-// Fonction qui applique les styles aux balises du texte
+
 fn apply_styles(text: &str) -> String {
     let styles = vec![
         ("[italique]", "\x1b[3m", "[/italique]", "\x1b[0m"),
@@ -29,7 +29,6 @@ fn apply_styles(text: &str) -> String {
     styled_text
 }
 
-// Fonction qui demande une entrée à l'utilisateur
 pub fn demander_au_joueur(prompt: &str) -> String {
     print!("{}", prompt);
     io::stdout().flush().unwrap();
@@ -40,7 +39,6 @@ pub fn demander_au_joueur(prompt: &str) -> String {
     input.trim().to_string()
 }
 
-// Fonction qui lit un fichier texte et applique les balises de style
 pub fn redaction_histoire(fichier: &str) {
     use std::{thread, time};
 
@@ -87,7 +85,7 @@ pub fn redaction_histoire(fichier: &str) {
     println!();
 }
 
-pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player: &mut Player) {
+pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle: &str, player: &mut Player) {
     println!("Vous êtes actuellement dans la zone : {}. Que comptez vous faire ?", zone_actuelle);
     println!("i. Ouvrir l'inventaire de vos personnages");
     println!("j. Ouvrir le journal");
@@ -95,72 +93,50 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
     println!("c. Voir tout les lieux visités");
     println!("indice. Avoir un indice");
     println!("q. Quitter le jeu");
-    
+
     let choix = demander_au_joueur("Votre choix : ");
 
-    loop {
-        match choix.as_str() {
-            "i" => {
-                println!("Ouverture de l'inventaire de vos personnages...");
-            },
-            "j" => {
-                println!("Ouverture du journal...");
-            },
-            "s" => {
-                println!("Ouverture de l'inventaire des Ombres...");
-
-            },
-            "c" => {
-                println!("Affichage des lieux visités...");
-                afficher_lieux_visites(db_manager);
-                menu_principal(db_manager, zone_actuelle, player);
-            },
-            "indice" => {println!("Voici un indice...");
-                indice();
-            },
-            "MontFavé" => {
-                deplacement_zone(db_manager, "MontFavé");
-                menu_principal(db_manager, "MontFavé", player);
-            }
-            "Rocher des Doms" => {
-                deplacement_zone(db_manager, "Rocher des Doms");
-                menu_principal(db_manager, "Rocher des Doms", player);
-            }
-            "Les Remparts" => {
-                deplacement_zone(db_manager, "Les Remparts");
-                menu_principal(db_manager, "Les Remparts", player);
-            }
-            "AvignAura" => {
-                deplacement_zone(db_manager, "AvignAura");
-                menu_principal(db_manager, "AvignAura", player);
-            }
-            "Palais des Papes" => {
-                deplacement_zone(db_manager, "Palais des Papes");
-                menu_principal(db_manager, "Palais des Papes", player);
-            }
-            "q" => {
-                println!("Quitter le jeu...");
-                println!("Sauvegarde en cours ...");
-                sauvegarde(db_manager, player.clone());
-                break;
-            }
-            _ => {
-                println!("Choix invalide. Veuillez réessayer.");
-                continue;
-            }
+    match choix.as_str() {
+        "i" => {
+            println!("Ouverture de l'inventaire de vos personnages...");
+            menu_principal(db_manager, zone_actuelle, player);
+        },
+        "j" => {
+            println!("Ouverture du journal...");
+            menu_principal(db_manager, zone_actuelle, player);
+        },
+        "s" => {
+            println!("Ouverture de l'inventaire des Ombres...");
+            menu_principal(db_manager, zone_actuelle, player);
+        },
+        "c" => {
+            afficher_lieux_visites(db_manager);
+            menu_principal(db_manager, zone_actuelle, player);
+        },
+        "indice" => {
+            afficher_indice(zone_actuelle);
+            menu_principal(db_manager, zone_actuelle, player);
+        },
+        "q" => {
+            println!("Quitter le jeu...");
+            println!("Sauvegarde en cours ...");
+            db_manager.sauvegarde(player.clone());
+            std::process::exit(0);
+        },
+        "Les Remparts" | "Rocher des Doms" | "MontFavé" | "Palais des Papes" | "AvignAura" => {
+            // Retourne le contrôle à boucle_ville
+            // Ne relance pas le menu ici
         }
-        break;
+        _ => {
+            println!("Choix invalide. Veuillez réessayer.");
+            menu_principal(db_manager, zone_actuelle, player);
+        }
     }
 }
 
-fn indice() {
-    println!("Ps encore fait");
+fn afficher_indice(zone: &str) {
+    println!("Pas encore d'indice défini pour la zone : {}", zone);
 }
-
-fn sauvegarde(db_manager: &DatabaseManager, player : Player) {
-    db_manager.sauvegarde(player);
-}
-
 
 fn afficher_lieux_visites(db_manager: &DatabaseManager) {
     let zones_visitees = db_manager.get_visited_zones();
