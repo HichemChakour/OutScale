@@ -1,0 +1,26 @@
+# Préfixes
+Ar
+Bel
+Cal
+Dor
+El
+Fen
+Gal
+Har
+Ith
+Kel
+
+# Suffixes
+dor
+ion
+mir
+nor
+las
+rin
+thar
+wyn
+var
+zar
+
+# Rounds
+5
