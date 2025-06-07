@@ -167,7 +167,7 @@ INSERT INTO objet(nom, degats, armure, taux_critique, mana, vitesse, degats_magi
         ('Excaliburne', 100, 0, 0, 0, 0, 0, 0, 0, 'arme');
 
 INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
-        ('"Gardien Corrompu"', 1, 50,50,0, 0, 0, 0, 20, 0, 5, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'),100, 1);
+        ('Gardien Corrompu', 1, 50,50,0, 0, 0, 0, 20, 0, 5, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'),100, 1);
 
 /*Zone2 Le roché des doms*/
 INSERT INTO entity(nom, enemy,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES

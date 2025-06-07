@@ -223,7 +223,7 @@ fn combattre_ennemi_zone(db_manager: &DatabaseManager, zone_actuelle: &str, play
     combat_manager.start_combat_loop();
 
     // Mettre à jour le joueur après le combat
-    // Cette partie est simplifiée - dans une implémentation complète, 
+    // Cette partie est simplifiée - dans une implémentation complète,
     // il faudrait synchroniser toutes les entités après le combat
     db_manager.sauvegarde(player.clone());
 }
@@ -258,31 +258,9 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
                 menu_principal(db_manager, zone_actuelle, player);
             },
             "f" => {
-                match zone_actuelle {
-                    "MontFavé" => {
-                        println!("Vous êtes dans la zone MontFavé, vous pouvez combattre l'ennemi de zone.");
-                        
-                    },
-                    "Rocher des Doms" => {
-                        println!("Vous êtes dans la zone Rocher des Doms, vous pouvez combattre l'ennemi de zone.");
-                        // Ici, vous pouvez appeler une fonction pour initier le combat
-                    },
-                    "Les Remparts" => {
-                        println!("Vous êtes dans la zone Les Remparts, vous pouvez combattre l'ennemi de zone.");
-                        // Ici, vous pouvez appeler une fonction pour initier le combat
-                    },
-                    "AvignAura" => {
-                        println!("Vous êtes dans la zone AvignAura, vous pouvez combattre l'ennemi de zone.");
-                        // Ici, vous pouvez appeler une fonction pour initier le combat
-                    },
-                    "Palais des Papes" => {
-                        println!("Vous êtes dans la zone Palais des Papes, vous pouvez combattre l'ennemi de zone.");
-                        // Ici, vous pouvez appeler une fonction pour initier le combat
-                    },
-                    _ => {
-                        println!("Zone inconnue. Vous ne pouvez pas combattre ici.");
-                    }
-                }
+                println!("Vous vous préparez au combat...");
+                combattre_ennemi_zone(db_manager, zone_actuelle, player);
+                menu_principal(db_manager, zone_actuelle, player);
             },
             "indice" => {println!("Voici un indice...");
                 indice();

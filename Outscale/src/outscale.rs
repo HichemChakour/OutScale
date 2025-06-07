@@ -16,6 +16,7 @@ use crate::entities::entity::{Entity, HasEntity};
 use crate::entities::player;
 use crate::entities::player::Player;
 use crate::entities::shadow::Shadow;
+use crate::outscale::cli_manager::menu_principal;
 use crate::outscale::combat_manager::CombatManager;
 
 use crate::skills::inventaire;
@@ -56,7 +57,6 @@ pub fn run() {
         Ok(true) => {
             println!("Une partie existante a été trouvée. Chargement...");
             player = db_manager.get_player_data();
-            //lancement_mode_histoire();
         }
         Ok(false) => {
             if let Err(e) = db_manager.insert_player() {
@@ -64,6 +64,7 @@ pub fn run() {
                 return;
             } else {
                 player = db_manager.get_player_data();
+               // lancement_mode_histoire();
             }
         }
         Err(e) => {
@@ -72,17 +73,23 @@ pub fn run() {
         }
     }
 
-    //lancement_mode_histoire();
-    test_skills_et_combat(&mut player);
-    db_manager.sauvegarde(player);
-    let mut player2 = db_manager.get_player_data();
-    test_recup_skills(&mut player2);
+    let mut player_mut = player;
+    let zone_initiale = "AvignAura"; // Zone de départ par défaut
+
+    // Marquer la zone comme visitée
+    db_manager.visite_lieu(zone_initiale);
+
+    // Lancer le menu principal
+    use crate::outscale::cli_manager::menu_principal;
+    menu_principal(&db_manager, zone_initiale, &mut player_mut);
     return;
 }
 
 pub fn lancement_mode_histoire() {
    cli_manager::redaction_histoire(&*(RESOURCE_DIR.to_owned() + "/dialogue/Introduction.txt"));
 }
+
+
 
 pub fn test_skills_et_combat(player: &mut Player) {
     // Création des compétences
