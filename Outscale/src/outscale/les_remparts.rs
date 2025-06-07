@@ -54,6 +54,7 @@ fn lancer_combat_remparts(player: &mut crate::entities::player::Player, prefixes
                 vec![],
                 enemy_level,
                 0,
+                1,
                 None,
             ));
             enemies.push(Box::new(enemy));

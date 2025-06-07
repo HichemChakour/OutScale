@@ -5,7 +5,7 @@ mod init_tables;
 pub(crate) mod cli_manager;
 mod combat_manager;
 mod ennemi_manager;
-pub mod zone
+pub mod zone;
 mod les_remparts;
 mod extraction_manager;
 mod levelup_manager;
