@@ -5,6 +5,9 @@ use std::path::Path;
 use crate::entities::player::Player;
 use crate::outscale::database_manager::DatabaseManager;
 use crate::outscale::zone::*;
+use crate::outscale::combat_manager::CombatManager;
+use crate::entities::entity::HasEntity;
+use crate::entities::shadow::Shadow;
 
 use crossterm::{
     event::{read, Event, KeyCode},
@@ -87,11 +90,150 @@ pub fn redaction_histoire(fichier: &str) {
     println!();
 }
 
+fn combattre_ennemi_zone(db_manager: &DatabaseManager, zone_actuelle: &str, player: &mut Player) {
+    // Obtenir l'ennemi spécifique à la zone
+    let mut ennemis: Vec<Box<dyn HasEntity>> = Vec::new();
+
+    match zone_actuelle {
+        "MontFavé" => {
+            // Récupérer le dragon noir depuis la base de données
+            if let Some(dragon) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "Le dragon noir") {
+                if dragon.entity.hp <= 0 {
+                    println!("Le dragon noir a déjà été vaincu!");
+                    return;
+                }
+                ennemis.push(Box::new(dragon));
+            } else {
+                println!("Erreur: Impossible de trouver l'ennemi de cette zone!");
+                return;
+            }
+        },
+        "Rocher des Doms" => {
+            // Récupérer les ennemis spécifiques à cette zone
+            if let Some(gardien) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "Gardien du temple") {
+                if gardien.entity.hp > 0 {
+                    ennemis.push(Box::new(gardien));
+                }
+            }
+            if let Some(pretre) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "Le prêtre") {
+                if pretre.entity.hp > 0 {
+                    ennemis.push(Box::new(pretre));
+                }
+            }
+            if let Some(imam) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "L`imame") {
+                if imam.entity.hp > 0 {
+                    ennemis.push(Box::new(imam));
+                }
+            }
+
+            if ennemis.is_empty() {
+                println!("Tous les ennemis de cette zone ont déjà été vaincus!");
+                return;
+            }
+        },
+        "Les Remparts" => {
+            // Zone spéciale avec génération aléatoire d'ennemis
+            println!("Les Remparts sont assaillis par des hordes de monstres!");
+            println!("Une nouvelle vague arrive...");
+
+            // Générer des ennemis aléatoires pour cette zone
+            use rand::Rng;
+            let mut rng = rand::thread_rng();
+            let nb_ennemis = rng.gen_range(1..=3);
+
+            for i in 0..nb_ennemis {
+                let hp = rng.gen_range(50..150);
+                let atk = rng.gen_range(10..30);
+
+                let ennemi = Shadow {
+                    entity: crate::entities::shadow::Entity::new(
+                        -100 - i, // ID négatif pour les ennemis temporaires
+                        format!("Monstre des Remparts #{}", i+1),
+                        hp,
+                        hp,
+                        50,
+                        50,
+                        5,
+                        5,
+                        atk,
+                        5,
+                        5,
+                        0.1,
+                        vec![],
+                        1,
+                        rng.gen_range(10..30),
+                        1, // Classe Guerrier par défaut
+                        None
+                    )
+                };
+
+                ennemis.push(Box::new(ennemi));
+            }
+        },
+        "AvignAura" => {
+            // Ennemi de la ville d'AvignAura
+            if let Some(corrupted) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "Gardien Corrompu") {
+                if corrupted.entity.hp <= 0 {
+                    println!("Le Gardien Corrompu a déjà été vaincu!");
+                    return;
+                }
+                ennemis.push(Box::new(corrupted));
+            } else {
+                println!("Erreur: Impossible de trouver l'ennemi de cette zone!");
+                return;
+            }
+        },
+        "Palais des Papes" => {
+            // Le boss final - Le Pape corrompu
+            if let Some(pape) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "Pape corrompu") {
+                if pape.entity.hp <= 0 {
+                    println!("Le Pape corrompu a déjà été vaincu!");
+                    return;
+                }
+                ennemis.push(Box::new(pape));
+            } else {
+                println!("Erreur: Impossible de trouver l'ennemi de cette zone!");
+                return;
+            }
+        },
+        _ => {
+            println!("Cette zone ne contient pas d'ennemis à combattre.");
+            return;
+        }
+    }
+
+    // Préparer le joueur et ses alliés
+    let mut allies: Vec<Box<dyn HasEntity>> = Vec::new();
+
+    // Ajouter le joueur principal
+    allies.push(Box::new(player.clone()));
+
+    // Ajouter jusqu'à deux ombres comme alliés
+    let mut ombres_dispo = player.ombres.clone();
+    let mut i = 0;
+    while i < ombres_dispo.len() && allies.len() < 3 {
+        if ombres_dispo[i].entity.hp > 0 {
+            allies.push(Box::new(ombres_dispo[i].clone()));
+        }
+        i += 1;
+    }
+
+    // Créer et lancer le combat
+    let mut combat_manager = CombatManager::new(allies, ennemis);
+    combat_manager.start_combat_loop();
+
+    // Mettre à jour le joueur après le combat
+    // Cette partie est simplifiée - dans une implémentation complète,
+    // il faudrait synchroniser toutes les entités après le combat
+    db_manager.sauvegarde(player.clone());
+}
+
 pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player: &mut Player) {
     println!("Vous êtes actuellement dans la zone : {}. Que comptez vous faire ?", zone_actuelle);
     println!("i. Ouvrir l'inventaire de vos personnages");
     println!("j. Ouvrir le journal");
     println!("s. Ouvrir l'inventaire des Ombres");
+    println!("f. Combattre l'ennemie de zone");
     println!("c. Voir tout les lieux visités");
     println!("indice. Avoir un indice");
     println!("q. Quitter le jeu");
@@ -113,6 +255,11 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
             "c" => {
                 println!("Affichage des lieux visités...");
                 afficher_lieux_visites(db_manager);
+                menu_principal(db_manager, zone_actuelle, player);
+            },
+            "f" => {
+                println!("Vous vous préparez au combat...");
+                combattre_ennemi_zone(db_manager, zone_actuelle, player);
                 menu_principal(db_manager, zone_actuelle, player);
             },
             "indice" => {println!("Voici un indice...");

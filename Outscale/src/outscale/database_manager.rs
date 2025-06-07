@@ -485,6 +485,39 @@ impl DatabaseManager {
         }
         return player;
     }
+    
+    pub(crate) fn get_ennemi_by_name(conn: &Connection, nom: &str) -> Option<Shadow> {
+        let query = "SELECT id,nom, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp ,classe_id FROM entity WHERE nom = ?1 AND enemy = true";
+        let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
+        let shadow_iter = stmt.query_map([nom], |row| {
+            Ok(Shadow {
+                entity: crate::entities::shadow::Entity::new(
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                    row.get(6)?,
+                    row.get(7)?,
+                    row.get(8)?,
+                    row.get(9)?,
+                    row.get(10)?,
+                    row.get::<_, f32>(11)?,
+                    vec![],
+                    row.get(12)?,
+                    row.get(13)?,
+                    row.get(14)?,
+                    None
+                ),
+            })
+        }).expect("Erreur lors de l'exécution de la requête");
+
+        for shadow in shadow_iter {
+            return Some(shadow.expect("Erreur lors de la récupération d'une ombre"));
+        }
+        None
+    }
 
     fn get_shadows(conn: &Connection) -> Vec<Shadow> {
         let query = "SELECT id,nom, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp ,classe_id FROM entity WHERE enemy = false";
