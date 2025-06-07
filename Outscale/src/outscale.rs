@@ -1,5 +1,6 @@
 /*use rusqlite::{params, Connection, Result};
 use std::path::Path;*/
+pub mod histoire;
 pub(crate) mod database_manager;
 mod init_tables;
 pub(crate) mod cli_manager;
@@ -71,7 +72,7 @@ pub fn run() {
     }
 
     //lancement_mode_histoire();
-    test_skills_et_combat(&mut player);
+    histoire::lancement_mode_histoire(&db_manager, &mut player);
     db_manager.sauvegarde(player);
     let mut player2 = db_manager.get_player_data();
     test_recup_skills(&mut player2);
