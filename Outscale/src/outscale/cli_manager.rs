@@ -15,7 +15,7 @@ use crossterm::{
     execute,
     terminal::{ClearType, Clear},
 };
-// Fonction qui applique les styles aux balises du texte
+
 fn apply_styles(text: &str) -> String {
     let styles = vec![
         ("[italique]", "\x1b[3m", "[/italique]", "\x1b[0m"),
@@ -23,6 +23,11 @@ fn apply_styles(text: &str) -> String {
         ("[bleu]", "\x1b[34m", "[/bleu]", "\x1b[0m"),
         ("[vert]", "\x1b[32m", "[/vert]", "\x1b[0m"),
         ("[rouge]", "\x1b[31m", "[/rouge]", "\x1b[0m"),
+        ("[jaune]", "\x1b[33m", "[/jaune]", "\x1b[0m"),
+        ("[cyan]", "\x1b[36m", "[/cyan]", "\x1b[0m"),
+        ("[magenta]", "\x1b[35m", "[/magenta]", "\x1b[0m"),
+        ("[blanc]", "\x1b[37m", "[/blanc]", "\x1b[0m"),
+        ("[noir]", "\x1b[30m", "[/noir]", "\x1b[0m"),
     ];
 
     let mut styled_text = text.to_string();
@@ -416,22 +421,27 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
             },
             "MontFavé" => {
                 deplacement_zone(db_manager, "MontFavé");
+                self::redaction_histoire("src/resources/dialogue/MF.txt");
                 menu_principal(db_manager, "MontFavé", player);
             }
             "Rocher des Doms" => {
                 deplacement_zone(db_manager, "Rocher des Doms");
+                self::redaction_histoire("src/resources/dialogue/Rocher.txt");
                 menu_principal(db_manager, "Rocher des Doms", player);
             }
             "Les Remparts" => {
                 deplacement_zone(db_manager, "Les Remparts");
+                self::redaction_histoire("src/resources/dialogue/Remparts.txt");
                 menu_principal(db_manager, "Les Remparts", player);
             }
             "AvignAura" => {
                 deplacement_zone(db_manager, "AvignAura");
+                self::redaction_histoire("src/resources/dialogue/Avignaura.txt");
                 menu_principal(db_manager, "AvignAura", player);
             }
             "Palais des Papes" => {
                 deplacement_zone(db_manager, "Palais des Papes");
+                self::redaction_histoire("src/resources/dialogue/PP_Dragon.txt");
                 menu_principal(db_manager, "Palais des Papes", player);
             }
             "q" => {

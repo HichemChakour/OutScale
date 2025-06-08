@@ -6,6 +6,7 @@ use rand::Rng;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Write};
 use rand::prelude::IndexedRandom;
+use crate::outscale::cli_manager;
 use crate::skills::skill::Skill;
 
 pub fn lancer_les_remparts(player: &mut crate::entities::player::Player) {
@@ -80,8 +81,7 @@ fn lancer_combat_remparts(player: &mut crate::entities::player::Player, prefixes
 
         // Demander au joueur s'il veut continuer
         if( *nb_round == 4) {
-            // Robin lancera le script d'histoire
-            println!("Vous avez fait tout les combats Canons. Vous pouvez continuer l'histoire. Mais vous pouvez continuer à défendre Avignaura au frond si vous désirez.");
+            cli_manager::redaction_histoire("src/resources/dialogue/Vue_MF.txt");
         }
         *nb_round += 1;
         println!("Souhaitez-vous continuer à combattre ? (o/n)");

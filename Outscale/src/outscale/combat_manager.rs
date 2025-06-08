@@ -4,6 +4,7 @@ use std::time::Duration;
 use crate::entities::entity::HasEntity;
 use crate::outscale::ennemi_manager::EnnemiManager;
 use rand::Rng;
+use crate::outscale::cli_manager;
 
 pub struct CombatManager {
     pub allies: Vec<Box<dyn HasEntity>>,
@@ -352,6 +353,15 @@ impl CombatManager {
             // Proposer l'extraction des ennemis vaincus
             use crate::outscale::extraction_manager::ExtractionManager;
             ExtractionManager::offer_extraction(&defeated_enemies);
+            
+            // Vérifier si des ennemis spéciaux ont été vaincus et afficher un texte spécifique
+            for enemy in &defeated_enemies {
+                if enemy.entity().name.contains("Le dragon noir") {
+                    cli_manager::redaction_histoire("src/resources/dialogue/MF_Fin.txt");
+                } else if enemy.entity().name.contains("Pape corrompu") {
+                    cli_manager::redaction_histoire("src/resources/dialogue/Fin.txt");
+                }
+            }
         }
         self.retire_stat_objets();
     }
