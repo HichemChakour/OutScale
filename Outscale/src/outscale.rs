@@ -14,16 +14,10 @@ mod shadow_manager;
 use std::env;
 use std::ptr::null;
 use crate::entities::enemy::Enemy;
-//use std::env;
 use crate::entities::entity::{Entity, HasEntity};
-use crate::entities::player;
 use crate::entities::player::Player;
-use crate::entities::shadow::Shadow;
 use crate::outscale::cli_manager::menu_principal;
-use crate::outscale::combat_manager::CombatManager;
 
-use crate::skills::inventaire;
-use crate::skills::skill::Skill;
 
 const RESOURCE_DIR: &str = "src/resources";
 const DB_PATH: &str = "src/save.db";

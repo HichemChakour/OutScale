@@ -1,4 +1,3 @@
-use colored::*;
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
@@ -7,7 +6,6 @@ use crate::outscale::database_manager::DatabaseManager;
 use crate::outscale::zone::*;
 use crate::outscale::combat_manager::CombatManager;
 use crate::entities::entity::HasEntity;
-use crate::entities::shadow::Shadow;
 use crate::skills::skill::Skill;
 
 use crossterm::{
@@ -15,6 +13,7 @@ use crossterm::{
     execute,
     terminal::{ClearType, Clear},
 };
+use crate::outscale::les_remparts::lancer_les_remparts;
 
 fn apply_styles(text: &str) -> String {
     let styles = vec![
@@ -116,19 +115,38 @@ fn combattre_ennemi_zone(db_manager: &DatabaseManager, zone_actuelle: &str, play
         },
         "Rocher des Doms" => {
             // Récupérer les ennemis spécifiques à cette zone
-            if let Some(gardien) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "Gardien du temple") {
+            if let Some(mut gardien) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "Gardien du temple") {
                 if gardien.entity.hp > 0 {
-                    ennemis.push(Box::new(gardien));
+                    let mut skills = DatabaseManager::get_skills_by_entity_id(&db_manager.conn, gardien.entity.id.clone(), 0);
+                    if skills.is_empty() {
+                        println!("Le Gardien du temple n'a pas de compétences assignées.");
+                    } else {
+                        gardien.entity.skills = skills;
+                        println!("{}", gardien.entity.skills.len());
+                    }
+                    ennemis.push(Box::new(gardien.clone()));
                 }
             }
-            if let Some(pretre) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "Le prêtre") {
+            if let Some(mut pretre) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "Le prêtre") {
                 if pretre.entity.hp > 0 {
-                    ennemis.push(Box::new(pretre));
+                    let mut skills = DatabaseManager::get_skills_by_entity_id(&db_manager.conn, pretre.entity.id.clone(), 0);
+                    if skills.is_empty() {
+                        println!("Le prêtre n'a pas de compétences assignées.");
+                    } else {
+                        pretre.entity.skills = skills;
+                    }
+                    ennemis.push(Box::new(pretre.clone()));
                 }
             }
-            if let Some(imam) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "L`imame") {
+            if let Some(mut imam) = DatabaseManager::get_ennemi_by_name(&db_manager.conn, "L`imame") {
                 if imam.entity.hp > 0 {
-                    ennemis.push(Box::new(imam));
+                    let mut skills = DatabaseManager::get_skills_by_entity_id(&db_manager.conn, imam.entity.id.clone(), 0);
+                    if skills.is_empty() {
+                        println!("L'imame n'a pas de compétences assignées.");
+                    } else {
+                        imam.entity.skills = skills;
+                    }
+                    ennemis.push(Box::new(imam.clone()));
                 }
             }
 
@@ -141,40 +159,7 @@ fn combattre_ennemi_zone(db_manager: &DatabaseManager, zone_actuelle: &str, play
             // Zone spéciale avec génération aléatoire d'ennemis
             println!("Les Remparts sont assaillis par des hordes de monstres!");
             println!("Une nouvelle vague arrive...");
-
-            // Générer des ennemis aléatoires pour cette zone
-            use rand::Rng;
-            let mut rng = rand::thread_rng();
-            let nb_ennemis = rng.gen_range(1..=3);
-
-            for i in 0..nb_ennemis {
-                let hp = rng.gen_range(50..150);
-                let atk = rng.gen_range(10..30);
-
-                let ennemi = Shadow {
-                    entity: crate::entities::shadow::Entity::new(
-                        -100 - i, // ID négatif pour les ennemis temporaires
-                        format!("Monstre des Remparts #{}", i+1),
-                        hp,
-                        hp,
-                        50,
-                        50,
-                        5,
-                        5,
-                        atk,
-                        5,
-                        5,
-                        0.1,
-                        vec![],
-                        1,
-                        rng.gen_range(10..30),
-                        1, // Classe Guerrier par défaut
-                        None
-                    )
-                };
-
-                ennemis.push(Box::new(ennemi));
-            }
+            lancer_les_remparts(player);
         },
         "AvignAura" => {
             // Ennemi de la ville d'AvignAura
@@ -452,6 +437,7 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
             }
             _ => {
                 println!("Choix invalide. Veuillez réessayer.");
+                menu_principal(db_manager, zone_actuelle, player);
             }
         }
         break;

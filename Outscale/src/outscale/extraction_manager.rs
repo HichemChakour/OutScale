@@ -1,6 +1,4 @@
-use rand::Rng;
 use crate::entities::entity::HasEntity;
-use rusqlite::{Connection, Result};
 use crate::entities::shadow::Shadow;
 
 pub struct ExtractionManager;
@@ -40,10 +38,7 @@ impl ExtractionManager {
 
         // Créer une connexion à la base de données et insérer le shadow
         let db_manager = crate::outscale::database_manager::DatabaseManager::new("src/save.db")?;
-        db_manager.insert_shadow(&shadow)?;
-
-        // Afficher l'ID de l'entité
-        println!("Shadow ajouté avec l'ID: {}", shadow.entity.id);
+        db_manager.sauvegarde_shadow(&shadow)?;
 
         Ok(())
     }
