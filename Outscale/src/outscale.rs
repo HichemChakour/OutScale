@@ -31,14 +31,13 @@ pub fn run() {
 
     let mut player : Player;
     if !database_manager::DatabaseManager::file_exists(DB_PATH) {
-        println!("Le fichier save.db n'existe pas. Création d'une nouvelle partie...");
-
+        println!("Création d'une nouvelle partie...");
+        cli_manager::redaction_histoire("src/resources/dialogue/Introduction.txt");
         let db_manager = database_manager::DatabaseManager::new(DB_PATH).unwrap();
         if let Err(e) = db_manager.execute_sql_file("././insertBDD/init_db.sql") {
             eprintln!("Erreur lors de l'exécution du fichier SQL : {}", e);
             return;
         }
-        println!("Base de données initialisée avec succès.");
     }
 
     // Instanciation de DatabaseManager
