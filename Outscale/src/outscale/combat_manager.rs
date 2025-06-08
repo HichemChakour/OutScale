@@ -9,6 +9,8 @@ pub struct CombatManager {
     pub allies: Vec<Box<dyn HasEntity>>,
     pub enemies: Vec<Box<dyn HasEntity>>,
     pub turn_order: Vec<Box<dyn HasEntity>>,
+    allies_sans_stat_inventaire: Vec<Box<dyn HasEntity>>,
+    pub victory: bool,
 }
 
 #[derive(Debug)]
@@ -24,6 +26,8 @@ impl CombatManager {
             allies,
             enemies,
             turn_order: Vec::new(),
+            allies_sans_stat_inventaire: Vec::new(),
+            victory: false,
         }
     }
 
@@ -290,13 +294,16 @@ impl CombatManager {
 
     fn enemy_turn(&mut self, enemy: Box<dyn HasEntity>) {
         println!("C'est au tour de \x1b[31m{}\x1b[0m de jouer ", enemy.entity().name);
-
+        thread::sleep_ms(1000);
         EnnemiManager::enemy_action(enemy, &mut self.allies, &mut self.enemies);
+        thread::sleep_ms(500);
     }
 
+    // Dans combat_manager.rs, modifiez le code existant de start_combat_loop
     pub fn start_combat_loop(&mut self) {
         println!("Le combat commence !");
-
+        let defeated_enemies = self.enemies.clone();
+        self.rajout_stat_objets();
         while !self.allies.is_empty() && !self.enemies.is_empty() {
             self.determine_turn_order();
 
@@ -327,9 +334,65 @@ impl CombatManager {
 
         // Déterminer le vainqueur
         if self.allies.is_empty() {
+            self.victory = false;
             println!("Les ennemis ont gagné !");
         } else {
+            self.victory = true;
             println!("Les alliés ont gagné !");
+
+            // Distribution de l'XP aux alliés
+            use crate::outscale::levelup_manager::LevelUpManager;
+            let xp_result = LevelUpManager::distribute_xp(&mut self.allies, &defeated_enemies);
+            println!("{}", xp_result);
+
+            // Afficher la progression vers le prochain niveau
+            let progress = LevelUpManager::show_xp_progress(&self.allies);
+            println!("{}", progress);
+
+            // Proposer l'extraction des ennemis vaincus
+            use crate::outscale::extraction_manager::ExtractionManager;
+            ExtractionManager::offer_extraction(&defeated_enemies);
+        }
+        self.retire_stat_objets();
+    }
+
+    pub(crate) fn rajout_stat_objets(&mut self) {
+        self.allies_sans_stat_inventaire.clear();
+
+        for ally in &mut self.allies {
+            // Sauvegarde l'état original
+            self.allies_sans_stat_inventaire.push(ally.clone());
+
+            // Clone l'inventaire AVANT toute modification
+            let inventaire_opt = ally.entity().inventaire.clone();
+            if let Some(inventaire) = inventaire_opt {
+                let objets = [inventaire.tete, inventaire.jambes, inventaire.torse, inventaire.main1, inventaire.main2];
+                let entity_mut = ally.entity_mut();
+                for objet in &objets {
+                    entity_mut.attack_dmg += objet.degats;
+                    entity_mut.magic_dmg += objet.magic_resist;
+                    entity_mut.armor += objet.armure;
+                    entity_mut.magic_resist += objet.magic_resist;
+                    entity_mut.hp += objet.hp;
+                    entity_mut.hp += objet.mana;
+                    entity_mut.speed += objet.vitesse;
+                }
+            }
+        }
+        
+    }
+
+    pub(crate) fn retire_stat_objets(&mut self) {
+        if self.allies_sans_stat_inventaire.len() != self.allies.len() {
+            println!("Impossible de restaurer les stats : sauvegarde incohérente.");
+            return;
+        }
+        for (ally, original) in self.allies.iter_mut().zip(self.allies_sans_stat_inventaire.iter()) {
+            // Remplace l'entité actuelle par la sauvegarde originale
+            let original_entity = original.entity().clone();
+            let entity_mut = ally.entity_mut();
+            *entity_mut = original_entity;
         }
     }
+
 }
