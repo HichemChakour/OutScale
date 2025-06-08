@@ -362,7 +362,6 @@ fn get_discovered_skills(db_manager: &DatabaseManager) -> Vec<Skill> {
 pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player: &mut Player) {
     println!("Vous êtes actuellement dans la zone : {}. Que comptez vous faire ?", zone_actuelle);
     println!("i. Ouvrir l'inventaire de votre personnage");
-    println!("j. Ouvrir le journal");
     println!("s. Ouvrir l'inventaire des Ombres");
     println!("f. Combattre l'ennemie de zone");
     println!("c. Voir tout les lieux visités");
@@ -377,9 +376,6 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
             "i" => {
                 inventaire_manager::gerer_inventaire_joueur(player);
                 menu_principal(db_manager, zone_actuelle, player);
-            },
-            "j" => {
-                println!("Ouverture du journal...");
             },
             "s" => {
                 println!("Ouverture de l'inventaire des Ombres...");
@@ -435,6 +431,32 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
                 println!("Sauvegarde en cours ...");
                 sauvegarde(db_manager, player.clone());
                 break;
+            }
+            "The Honored One" => {
+                // Code de triche : ajoute le sort "Hollow Purple" au joueur
+                let mut hollow_purple = Skill {
+                    id: 0,
+                    name: String::from("Hollow Purple"),
+                    discovered: true,
+                    description: String::from("Puissance ultime venue d'un autre monde, une équation imaginaire qui annihile tout sur son passage."),
+                    hp_refound: 0,
+                    mana_cost: 0,
+                    mana_refound: 0,
+                    magic_resist_debuff: 0,
+                    magic_resist_buff: 0,
+                    armor_debuff: 0,
+                    armor_buff: 0,
+                    attack_dmg: 0,
+                    attack_dmg_buff: 0,
+                    magic_dmg: 999999,
+                    magic_dmg_buff: 0,
+                    for_allies: false,
+                    entity_id: -1,
+                    player_id: 1,
+                };
+                player.entity.skills.push(hollow_purple);
+                println!("\x1b[35mLe sort Hollow Purple a été ajouté à votre personnage !\x1b[0m");
+                menu_principal(db_manager, zone_actuelle, player);
             }
             _ => {
                 println!("Choix invalide. Veuillez réessayer.");

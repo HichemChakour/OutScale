@@ -2,6 +2,7 @@ use crate::entities::shadow::Shadow;
 use crate::outscale::database_manager::DatabaseManager;
 use crate::entities::player::Player;
 use std::io;
+use rand::prelude::IndexedRandom;
 
 pub struct ShadowManager;
 
@@ -47,7 +48,19 @@ impl ShadowManager {
  pub fn select_shadow(db_manager: &DatabaseManager, player: &mut Player) {
      println!("=== Gestion des Ombres ===");
      println!("Ombres actuellement dans votre équipe :");
-
+ 
+     // Si le joueur a plus de 2 ombres, on en enlève une au hasard
+     if player.ombres.len() > 2 {
+         let mut rng = rand::rng();
+         let idx = (0..player.ombres.len()).collect::<Vec<_>>().choose(&mut rng).cloned().unwrap();
+         let removed_shadow = player.ombres.remove(idx);
+         // On libère l'ombre dans la base de données
+         let update_query = "UPDATE entity SET used = false WHERE id = ?1";
+         db_manager.conn.execute(update_query, [removed_shadow.entity.id])
+             .expect("Erreur lors de la mise à jour du statut de l'ombre retirée");
+         println!("Une ombre a été retirée au hasard de votre équipe car votre équipe était complète : {}", removed_shadow.entity.name);
+     }
+ 
      let mut used_shadows = Vec::new();
      for (i, shadow) in player.ombres.iter().enumerate() {
          println!("{}: {} (Nv {}) - PV: {}/{}",
@@ -55,31 +68,31 @@ impl ShadowManager {
              shadow.entity.hp, shadow.entity.max_hp);
          used_shadows.push(shadow.clone());
      }
-
+ 
      println!("\nOmbres disponibles :");
      let available_shadows = Self::show_available_shadows(db_manager);
-
+ 
      if available_shadows.is_empty() {
          println!("Aucune ombre disponible pour le moment.");
          return;
      }
-
+ 
      for (i, shadow) in available_shadows.iter().enumerate() {
          let classe_name = Self::get_class_name(db_manager, shadow.entity.classe_id);
          println!("{}: {} (Nv {}) - PV: {}/{} - Classe: {}",
              i+1, shadow.entity.name, shadow.entity.level,
              shadow.entity.hp, shadow.entity.max_hp, classe_name);
      }
-
+ 
      println!("\nQue souhaitez-vous faire ?");
      println!("1. Ajouter une ombre à votre équipe");
      println!("2. Remplacer une ombre de votre équipe");
      println!("q. Retour au menu principal");
-
+ 
      let mut input = String::new();
      io::stdin().read_line(&mut input).expect("Impossible de lire l'entrée");
      let input = input.trim();
-
+ 
      match input {
          "1" => Self::add_shadow(db_manager, player, &available_shadows),
          "2" => Self::replace_shadow(db_manager, player, &available_shadows),

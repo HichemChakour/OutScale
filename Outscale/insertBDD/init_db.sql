@@ -117,11 +117,6 @@ CREATE TABLE IF NOT EXISTS skills (
     player_id INTEGER DEFAULT NULL -- ID du joueur qui possède la compétence
 );
 
-CREATE TABLE IF NOT EXISTS journal (
-     id INTEGER PRIMARY KEY AUTOINCREMENT,
-     texte TEXT DEFAULT NULL,
-      date DATE DEFAULT (DATE('now'))
-);
 
 CREATE TABLE IF NOT EXISTS zones(
     nom TEXT PRIMARY KEY,

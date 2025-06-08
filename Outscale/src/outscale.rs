@@ -13,9 +13,7 @@ mod shadow_manager;
 mod inventaire_manager;
 
 use std::env;
-use std::ptr::null;
-use crate::entities::enemy::Enemy;
-use crate::entities::entity::{Entity, HasEntity};
+use crate::entities::entity::{HasEntity};
 use crate::entities::player::Player;
 use crate::outscale::cli_manager::menu_principal;
 
@@ -39,6 +37,7 @@ pub fn run() {
             eprintln!("Erreur lors de l'exécution du fichier SQL : {}", e);
             return;
         }
+        les_remparts::write_nb_round("src/resources/prefixes_suffixes.txt", 0);
     }
 
     // Instanciation de DatabaseManager
@@ -71,11 +70,6 @@ pub fn run() {
         }
     }
 
-    //lancement_mode_histoire();
-   // test_skills_et_combat(&mut player);
-    //db_manager.sauvegarde(player);
-    //let mut player2 = db_manager.get_player_data();
-    //test_recup_skills(&mut player2);
     let mut player_mut = player;
     let zone_initiale = "AvignAura";
 

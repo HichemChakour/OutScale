@@ -4,6 +4,7 @@ use std::time::Duration;
 use crate::entities::entity::HasEntity;
 use crate::outscale::ennemi_manager::EnnemiManager;
 use rand::Rng;
+use rand::seq::IndexedRandom;
 use crate::outscale::cli_manager;
 
 pub struct CombatManager {
@@ -20,9 +21,17 @@ pub enum CancelAction {
 }
 
 impl CombatManager {
-    pub fn new(allies: Vec<Box<dyn HasEntity>>, enemies: Vec<Box<dyn HasEntity>>) -> Self {
-        assert!(allies.len() <= 3, "Le nombre maximum d'alliés est 3.");
-        assert!(enemies.len() <= 3, "Le nombre maximum d'ennemis est 3.");
+    pub fn new(mut allies: Vec<Box<dyn HasEntity>>, mut enemies: Vec<Box<dyn HasEntity>>) -> Self {
+        let mut rng = rand::rng();
+
+        while allies.len() > 3 {
+            let idx = (0..allies.len()).collect::<Vec<_>>().choose(&mut rng).cloned().unwrap();
+            allies.remove(idx);
+        }
+        while enemies.len() > 3 {
+            let idx = (0..enemies.len()).collect::<Vec<_>>().choose(&mut rng).cloned().unwrap();
+            enemies.remove(idx);
+        }
         CombatManager {
             allies,
             enemies,

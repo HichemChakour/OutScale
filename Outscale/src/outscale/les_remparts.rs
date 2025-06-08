@@ -182,7 +182,7 @@ fn charger_skills_depuis_fichier(chemin: &str) -> Vec<Skill> {
     let reader = BufReader::new(file);
     serde_json::from_reader(reader).expect("Erreur lors du parsing du fichier JSON")
 }
-fn write_nb_round(chemin: &str, nb_round: i32) {
+pub fn write_nb_round(chemin: &str, nb_round: i32) {
     let file = File::open(chemin).expect("Impossible d'ouvrir le fichier");
     let reader = BufReader::new(file);
     let mut lignes: Vec<String> = Vec::new();

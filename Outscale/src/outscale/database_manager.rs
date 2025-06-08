@@ -558,7 +558,6 @@ impl DatabaseManager {
             } 
         }
         for skill in skill_a_inserer {
-            println!("INSERTION DU SKILL d'ID {}", skill.id);
             Self::inserer_skills(&conn, skill);
         }
     }
