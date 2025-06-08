@@ -12,6 +12,8 @@ mod levelup_manager;
 mod shadow_manager;
 
 use std::env;
+use std::ptr::null;
+use crate::entities::enemy::Enemy;
 use crate::entities::entity::{Entity, HasEntity};
 use crate::entities::player::Player;
 use crate::outscale::cli_manager::menu_principal;
@@ -52,6 +54,7 @@ pub fn run() {
         Ok(true) => {
             println!("Une partie existante a été trouvée. Chargement...");
             player = db_manager.get_player_data();
+            //lancement_mode_histoire();
         }
         Ok(false) => {
             if let Err(e) = db_manager.insert_player() {
