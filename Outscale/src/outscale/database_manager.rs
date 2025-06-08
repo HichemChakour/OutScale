@@ -117,13 +117,14 @@ impl DatabaseManager {
     }
 
     pub fn get_player_inventory_id(&self) -> Result<i32> {
+
         let query = "SELECT inventaire_id FROM player";
         let id: i32 = self.conn.query_row(query, [], |row| row.get(0))?;
         Ok(id)
     }
 
     pub fn get_objet_by_id(&self, id: i32) -> Result<Objet> {
-        let query = "SELECT id, inventaire_id, nom, degats, degats_magiques, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet
+        let query = "SELECT id, inventaire_id, nom, degats, degats_magique, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet
                      FROM objet WHERE id = ?1";
         self.conn.query_row(query, [id], |row| {
             Ok(Objet {
@@ -144,10 +145,9 @@ impl DatabaseManager {
     }
     pub fn get_player_inventory(&self) -> Option<Inventaire> {
         let id_inventaire = self.get_player_inventory_id().ok()?;
-
         let query = "SELECT equipement_tete, equipement_torse, equipement_jambe, main1, main2
                  FROM inventaire WHERE id = ?1";
-        let (id_tete, id_torse, id_jambe, id_main1, id_main2): (i32, i32, i32, i32, i32) =
+        let (id_tete, id_torse, id_jambe, id_main1, id_main2): (Option<i32>, Option<i32>, Option<i32>, Option<i32>, Option<i32>) =
             self.conn.query_row(query, [id_inventaire], |row| {
                 Ok((
                     row.get(0)?,
@@ -158,50 +158,62 @@ impl DatabaseManager {
                 ))
             }).ok()?;
 
-        let tete = self.get_objet_by_id(id_tete).ok()?;
-        let torse = self.get_objet_by_id(id_torse).ok()?;
-        let jambes = self.get_objet_by_id(id_jambe).ok()?;
-        let main1 = self.get_objet_by_id(id_main1).ok()?;
-        let main2 = self.get_objet_by_id(id_main2).ok()?;
-
+        let id_tete = id_tete.unwrap_or(-2);
+        let id_torse = id_torse.unwrap_or(-2);
+        let id_jambe = id_jambe.unwrap_or(-2);
+        let id_main1 = id_main1.unwrap_or(-2);
+        let id_main2 = id_main2.unwrap_or(-2);
+        // Récupère tous les objets de l'inventaire
         let mut stmt = self.conn.prepare(
-            "SELECT id, inventaire_id, nom, degats, degats_magiques, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet
+            "SELECT id, inventaire_id, nom, degats, degats_magique, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet
          FROM objet
-         WHERE inventaire_id = ?1
-         AND id NOT IN (?2, ?3, ?4, ?5, ?6)",
+         WHERE inventaire_id = ?1"
         ).ok()?;
-        let objets_iter = stmt.query_map(
-            [id_inventaire, id_tete, id_torse, id_jambe, id_main1, id_main2],
-            |row| {
-                Ok(Objet {
-                    id: row.get(0)?,
-                    inventaire_id: row.get(1)?,
-                    nom: row.get(2)?,
-                    degats: row.get(3)?,
-                    degats_magiques: row.get(4)?,
-                    armure: row.get(5)?,
-                    magic_resist: row.get(6)?,
-                    mana: row.get(7)?,
-                    taux_critique: row.get(8)?,
-                    vitesse: row.get(9)?,
-                    hp: row.get(10)?,
-                    type_objet: row.get(11)?,
-                })
-            },
-        ).ok()?;
-
+        let objets_iter = stmt.query_map([id_inventaire], |row| {
+            Ok(Objet {
+                id: row.get(0)?,
+                inventaire_id: row.get(1)?,
+                nom: row.get(2)?,
+                degats: row.get(3)?,
+                degats_magiques: row.get(4)?,
+                armure: row.get(5)?,
+                magic_resist: row.get(6)?,
+                mana: row.get(7)?,
+                taux_critique: row.get(8)?,
+                vitesse: row.get(9)?,
+                hp: row.get(10)?,
+                type_objet: row.get(11)?,
+            })
+        }).ok()?;
+        // Trie les objets équipés et non équipés
+        let mut tete = None;
+        let mut torse = None;
+        let mut jambes = None;
+        let mut main1 = None;
+        let mut main2 = None;
         let mut liste_objets = Vec::new();
+
         for objet in objets_iter {
-            liste_objets.push(objet.ok()?);
+            let obj = objet.ok()?;
+            match obj.id {
+                id if id == id_tete => tete = Some(obj),
+                id if id == id_torse => torse = Some(obj),
+                id if id == id_jambe => jambes = Some(obj),
+                id if id == id_main1 => main1 = Some(obj),
+                id if id == id_main2 => main2 = Some(obj),
+                _ => liste_objets.push(obj),
+            }
         }
 
+        // Si un slot est vide, il faut un objet "vide" (à adapter selon ta struct)
+        let objet_vide = Objet::objet_vide();
         Some(Inventaire {
             id: id_inventaire,
-            tete,
-            jambes,
-            torse,
-            main1,
-            main2,
+            tete: tete.unwrap_or_else(|| objet_vide.clone()),
+            jambes: jambes.unwrap_or_else(|| objet_vide.clone()),
+            torse: torse.unwrap_or_else(|| objet_vide.clone()),
+            main1: main1.unwrap_or_else(|| objet_vide.clone()),
+            main2: main2.unwrap_or_else(|| objet_vide.clone()),
             liste_objets,
         })
     }
@@ -343,7 +355,11 @@ impl DatabaseManager {
                 objets_a_inserer.push(objet);
             } else if objet.id == -1 {
                 objets_a_supprimer.push(objet);
-            } else {
+            }
+            else if objet.id == -2 {
+                continue;
+            }
+            else {
                 objets_a_modifier.push(objet);
             }
         }
@@ -369,9 +385,6 @@ impl DatabaseManager {
             ).expect("Erreur lors de l'insertion d'un nouvel objet dans la base de données");
         }
 
-        for objet in objets_a_modifier {
-            Self::sauvegarde_modification_objet(&self.conn, objet);
-        }
 
         for objet in objets_a_supprimer {
             Self::delete_objet(&self.conn, objet.id);
@@ -380,26 +393,6 @@ impl DatabaseManager {
         Self::sauvegarde_skills(&self.conn, &player);
     }
 
-    // Correction pour la méthode sauvegarde_modification_objet
-    fn sauvegarde_modification_objet(conn: &Connection, objet: Objet) {
-        conn.execute(
-            "UPDATE objet SET inventaire_id = ?1, nom = ?2, degats = ?3, degats_magiques = ?4, armure = ?5, magic_resist = ?6, mana = ?7, taux_critique = ?8, vitesse = ?9, hp = ?10, type_objet = ?11 WHERE id = ?12",
-            rusqlite::params![
-            objet.inventaire_id,
-            objet.nom,
-            objet.degats,
-            objet.degats_magiques,
-            objet.armure,
-            objet.magic_resist,
-            objet.mana,
-            objet.taux_critique as i32,
-            objet.vitesse,
-            objet.hp,
-            objet.type_objet,
-            objet.id
-        ],
-        ).expect("Erreur lors de la sauvegarde de l'objet dans la base de données");
-    }
 
     // Correction pour la méthode update_player
     fn update_player(conn: &Connection, player: &Player) {
@@ -476,7 +469,6 @@ impl DatabaseManager {
         player.entity.skills = Self::get_skills_by_entity_id(&self.conn, 1,1);
         for ombre in player.ombres.iter_mut() {
             ombre.entity.inventaire = Self::get_inventaire_by_id_entity(&self, ombre.entity.id).ok();
-            println!("ombre: {:?}", ombre.entity.id);
             ombre.entity.skills = Self::get_skills_by_entity_id(&self.conn, ombre.entity.id, 0);
         }
         return player;
@@ -544,7 +536,6 @@ impl DatabaseManager {
 
         let mut shadows = Vec::new();
         for shadow in shadows_iter {
-            println!("INSERTION DE LA SHADOW d'ID {}", shadow.as_ref().unwrap().entity.id);
             shadows.push(shadow.expect("Erreur lors de la récupération d'une ombre"));
         }
         shadows

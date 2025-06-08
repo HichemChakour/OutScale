@@ -7,7 +7,7 @@ use crate::outscale::zone::*;
 use crate::outscale::combat_manager::CombatManager;
 use crate::entities::entity::HasEntity;
 use crate::skills::skill::Skill;
-
+use crate::outscale::inventaire_manager;
 use crossterm::{
     event::{read, Event, KeyCode},
     execute,
@@ -361,7 +361,7 @@ fn get_discovered_skills(db_manager: &DatabaseManager) -> Vec<Skill> {
 
 pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player: &mut Player) {
     println!("Vous êtes actuellement dans la zone : {}. Que comptez vous faire ?", zone_actuelle);
-    println!("i. Ouvrir l'inventaire de vos personnages");
+    println!("i. Ouvrir l'inventaire de votre personnage");
     println!("j. Ouvrir le journal");
     println!("s. Ouvrir l'inventaire des Ombres");
     println!("f. Combattre l'ennemie de zone");
@@ -375,7 +375,8 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
     loop {
         match choix.as_str() {
             "i" => {
-                println!("Ouverture de l'inventaire de vos personnages...");
+                inventaire_manager::gerer_inventaire_joueur(player);
+                menu_principal(db_manager, zone_actuelle, player);
             },
             "j" => {
                 println!("Ouverture du journal...");
