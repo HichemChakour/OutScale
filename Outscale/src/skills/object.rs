@@ -46,4 +46,20 @@ pub struct Objet {
                 type_objet
             }
         }
+        pub fn objet_vide() -> Self {
+            Objet {
+                id: -2, // pour la sauvegarde
+                inventaire_id: -1,
+                nom: "Aucun".to_string(),
+                degats: 0,
+                degats_magiques: 0,
+                armure: 0,
+                magic_resist: 0,
+                mana: 0,
+                taux_critique: 0,
+                vitesse: 0,
+                hp: 0,
+                type_objet: "aucun".to_string(),
+            }
+        }
     }

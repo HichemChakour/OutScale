@@ -10,6 +10,7 @@ mod les_remparts;
 mod extraction_manager;
 mod levelup_manager;
 mod shadow_manager;
+mod inventaire_manager;
 
 use std::env;
 use std::ptr::null;

@@ -34,8 +34,7 @@ impl Inventaire {
 
     pub(crate) fn to_string(&self) -> String {
         format!(
-            "Inventaire {{ id: {}, tete: {}, jambes: {}, torse: {}, main1: {}, main2: {} }}",
-            self.id,
+            "Inventaire {{ tete: {}, jambes: {}, torse: {}, main1: {}, main2: {} }}",
             self.tete.nom,
             self.jambes.nom,
             self.torse.nom,
