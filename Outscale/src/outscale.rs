@@ -12,16 +12,10 @@ mod levelup_manager;
 mod shadow_manager;
 
 use std::env;
-use crate::entities::enemy::Enemy;
 use crate::entities::entity::{Entity, HasEntity};
-use crate::entities::player;
 use crate::entities::player::Player;
-use crate::entities::shadow::Shadow;
 use crate::outscale::cli_manager::menu_principal;
-use crate::outscale::combat_manager::CombatManager;
 
-use crate::skills::inventaire;
-use crate::skills::skill::Skill;
 
 const RESOURCE_DIR: &str = "src/resources";
 const DB_PATH: &str = "src/save.db";
@@ -79,7 +73,6 @@ pub fn run() {
     //db_manager.sauvegarde(player);
     //let mut player2 = db_manager.get_player_data();
     //test_recup_skills(&mut player2);
-    test_les_remparts();
     let mut player_mut = player;
     let zone_initiale = "AvignAura";
 
@@ -110,31 +103,4 @@ pub fn test_recup_skills(player: &mut Player) {
                 skill.id, skill.name, skill.description, skill.mana_cost, skill.attack_dmg, skill.magic_dmg);
         }
     }
-}
-
-pub fn test_les_remparts(){
-    let mut OperatorSkill = Skill::new(
-        0,
-        "Opérateur".to_string(),
-        "Un opérateur de combat surentraîné qui élimine tout sur son passage.".to_string(),
-        0,
-        -150,
-        0,
-        0,
-        0,
-        0,
-        0,
-        9999,
-        0,
-        9999,
-        0,
-        false,
-        -1
-    );
-    let mut playerTest = Player::new(
-        Entity::new(0, "TestPlayer".to_string(), 400, 700, 10, 10, 5, 5, 1, 1, 1, 1.0, vec![], 1, 0, 1, None),
-        vec![],
-    );
-    playerTest.entity.skills.push(OperatorSkill);
-    les_remparts::lancer_les_remparts(&mut playerTest);
 }

@@ -2,7 +2,7 @@ use rand::prelude::IteratorRandom;
 use rand::Rng;
 use rand::seq::{IndexedMutRandom, /*SliceRandom*/};
 use crate::entities::entity::HasEntity;
-
+use crate::skills::skill::Skill;
 pub struct EnnemiManager;
 
 impl EnnemiManager {
@@ -11,17 +11,13 @@ impl EnnemiManager {
         allies: &mut Vec<Box<dyn HasEntity>>,
         enemies: &mut Vec<Box<dyn HasEntity>>,
     ) {
-
         let mut rng = rand::rng();
-
-        // Filtrer les compétences utilisables (suffisamment de mana)
-        let usable_skills: Vec<_> = enemy
-            .entity()
-            .skills
-            .iter()
-            .filter(|skill| skill.mana_cost <= enemy.entity().mana)
-            .cloned()
-            .collect();
+        let mut usable_skills: Vec<Skill> = vec![];
+        for skill in enemy.entity().skills.iter() {
+            if skill.mana_cost <= enemy.entity().mana{
+                usable_skills.push(skill.clone());
+            }
+        }
 
         if usable_skills.is_empty() {
             // Si aucune compétence n'est utilisable, effectuer une attaque de base

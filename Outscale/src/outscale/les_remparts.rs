@@ -1,7 +1,6 @@
 use crate::entities::enemy::Enemy;
 use crate::entities::entity::{Entity, HasEntity};
 use crate::outscale::combat_manager::CombatManager;
-use rand::seq::SliceRandom;
 use rand::Rng;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Write};
@@ -59,6 +58,7 @@ fn lancer_combat_remparts(player: &mut crate::entities::player::Player, prefixes
             ));
             enemies.push(Box::new(enemy));
         }
+        self::assigner_skills_aux_ennemis(&mut enemies);
 
         // Initialisation du combat
         let mut allies: Vec<Box<dyn HasEntity>> = player
@@ -73,7 +73,7 @@ fn lancer_combat_remparts(player: &mut crate::entities::player::Player, prefixes
 
         // Vérification de la défaite
         if !combat_manager.victory {
-            println!("Vous avez été vaincu. Fin des Remparts.");
+            println!("Vous avez été vaincu... Vous quitez les remparts.");
             write_nb_round("src/resources/prefixes_suffixes.txt", *nb_round);
             break;
         }

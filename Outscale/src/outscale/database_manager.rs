@@ -51,37 +51,69 @@ impl DatabaseManager {
         Ok(())
     }
 
-    pub fn insert_shadow(&self, shadow: &Shadow) -> Result<(), Box<dyn std::error::Error>> {
-        let query = "SELECT COUNT(*) FROM entity WHERE id = ?1";
-        let count: i64 = self.conn.query_row(query, [shadow.entity.id], |row| row.get(0))?;
-        println!("count shadow: {:?}", count);
-        if count > 0 {
+    pub fn sauvegarde_shadow(&self, shadow: &Shadow) -> Result<(), Box<dyn std::error::Error>> {
+        let mut entity_id: i32 = 0;
+        if shadow.entity.id != 0 {
             // Si l'ombre existe déjà, on met à jour ses informations
             self.conn.execute(
-                "UPDATE entity SET enemy = 0 WHERE id = ?1",
-                [shadow.entity.id]
+                "UPDATE entity SET nom = ?1, enemy = 0, used = 0, max_hp = ?2, hp = ?3, max_mana = ?4, mana = ?5, magic_resist = ?6, armor = ?7, attack_damage = ?8, magic_damage = ?9, speed = ?10, dodge_chance = ?11, xp = ?12, level = ?13 WHERE id = ?14",
+                rusqlite::params![
+                    shadow.entity.name,
+                    shadow.entity.max_hp,
+                    shadow.entity.hp,
+                    shadow.entity.max_mana,
+                    shadow.entity.mana,
+                    shadow.entity.magic_resist,
+                    shadow.entity.armor,
+                    shadow.entity.attack_dmg,
+                    shadow.entity.magic_dmg,
+                    shadow.entity.speed,
+                    shadow.entity.dodge_chance as f32,
+                    shadow.entity.xp,
+                    shadow.entity.level,
+                    shadow.entity.id,
+                ],
             )?;
-            return Ok(());
         } else {
+            // Si l'ombre n'existe pas, on l'insère
             self.conn.execute(
-            "INSERT INTO entity (nom, enemy, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id) \
-                     VALUES (?1, 0, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
-            rusqlite::params![
-            shadow.entity.name,
-            shadow.entity.max_hp,
-            shadow.entity.hp,
-            shadow.entity.max_mana,
-            shadow.entity.mana,
-            shadow.entity.magic_resist,
-            shadow.entity.armor,
-            shadow.entity.attack_dmg,
-            shadow.entity.magic_dmg,
-            shadow.entity.speed,
-            shadow.entity.dodge_chance as f32,
-            shadow.entity.classe_id,
-            ], )?;
-            Ok(())
+                "INSERT INTO entity (nom, enemy,used,max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, inventaire_id, xp, level) \
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)",
+                rusqlite::params![
+                shadow.entity.name,
+                0,
+                0,
+                shadow.entity.max_hp,
+                shadow.entity.hp,
+                shadow.entity.max_mana,
+                shadow.entity.mana,
+                shadow.entity.magic_resist,
+                shadow.entity.armor,
+                shadow.entity.attack_dmg,
+                shadow.entity.magic_dmg,
+                shadow.entity.speed,
+                shadow.entity.dodge_chance as f32,
+                shadow.entity.classe_id,
+                -1,
+                shadow.entity.xp,
+                shadow.entity.level,
+            ]
+            )?;
+
+            // Récupérer l'ID de l'entité nouvellement insérée
+            entity_id = self.conn.last_insert_rowid() as i32;
+            println!("Insert entity id: {}", entity_id);
+            // Mettre à jour l'entity_id des compétences associées à cette ombre
+            for skill in &shadow.entity.skills {
+                if let Err(e) = Self::sauvegarde_skills_shadow(&self.conn, skill, entity_id) {
+                    eprintln!("Erreur lors de la sauvegarde d'une compétence : {}", e);
+                }
+            }
         }
+
+
+
+        Ok(())
     }
 
     pub fn get_player_inventory_id(&self) -> Result<i32> {
@@ -298,11 +330,8 @@ impl DatabaseManager {
         }
 
         for ombre in &player.ombres {
-            Self::sauvegarde_ombre(&self.conn, ombre.clone());
-            if let Some(inventaire) = &ombre.entity.inventaire {
-                for objet in &inventaire.liste_objets {
-                    tout_les_objets.push(objet.clone());
-                }
+            if let Err(e) = self.sauvegarde_shadow(ombre) {
+                eprintln!("Erreur lors de la sauvegarde d'une ombre : {}", e);
             }
         }
 
@@ -411,39 +440,6 @@ impl DatabaseManager {
             "DELETE FROM objet WHERE id = ?1",
             rusqlite::params![id_objet],
         ).expect("Erreur lors de la suppression de l'objet dans la base de données");
-    }
-
-    fn sauvegarde_ombre(conn: &Connection, ombre: Shadow) {
-        conn.execute(
-            "UPDATE entity SET hp = ?1, mana = ?2, magic_resist = ?3, armor = ?4, attack_damage = ?5, magic_damage = ?6, speed = ?7, dodge_chance = ?8, level = ?9, xp = ?10 WHERE id = ?11",
-            rusqlite::params![
-                ombre.entity.hp,
-                ombre.entity.mana,
-                ombre.entity.magic_resist,
-                ombre.entity.armor,
-                ombre.entity.attack_dmg,
-                ombre.entity.magic_dmg,
-                ombre.entity.speed,
-                ombre.entity.dodge_chance as i32,
-                ombre.entity.level,
-                ombre.entity.xp,
-                ombre.entity.id
-            ],
-        ).expect("Erreur lors de la mise à jour de l'ombre dans la base de données");
-
-        if let Some(inventaire) = &ombre.entity.inventaire {
-            conn.execute(
-                "UPDATE inventaire SET equipement_tete = ?1, equipement_torse = ?2, equipement_jambe = ?3, main1 = ?4, main2 = ?5 WHERE id = ?6",
-                rusqlite::params![
-                    inventaire.tete.id,
-                    inventaire.torse.id,
-                    inventaire.jambes.id,
-                    inventaire.main1.id,
-                    inventaire.main2.id,
-                    inventaire.id
-                ],
-            ).expect("Erreur lors de la sauvegarde de l'inventaire de l'ombre dans la base de données");
-        }
     }
 
     pub fn get_player_data(&self) -> Player {
@@ -603,50 +599,60 @@ impl DatabaseManager {
     }
 
 
-   fn get_skills_by_entity_id(conn: &Connection, entity_id: i32, player_id: i32) -> Vec<Skill> {
-       let query: &str;
-       let params: Vec<&dyn rusqlite::ToSql>; // Utilisez un vecteur pour stocker les références
+    pub fn get_skills_by_entity_id(conn: &Connection, entity_id: i32, player_id: i32) -> Vec<Skill> {
+        // Requête SQL qui sélectionne les compétences soit par player_id, soit par entity_id
+        let query = if player_id != 0 {
+            "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound,
+                magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff,
+                attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id
+         FROM skills WHERE player_id = ?1"
+        } else {
+            "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound,
+                magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff,
+                attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id
+         FROM skills WHERE entity_id = ?1"
+        };
 
-       if player_id == 1 {
-           query = "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id FROM skills WHERE player_id = 1";
-           params = vec![]; // Pas de paramètres nécessaires
-       } else {
-           query = "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id FROM skills WHERE entity_id = ?1";
-           params = vec![&entity_id]; // Stockez la référence dans un vecteur
-       }
+        let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête pour les skills");
+        let param = if player_id != 0 { player_id } else { entity_id };
 
-       let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
-       let skills_iter = stmt.query_map(&*params, |row| {
-           Ok(Skill {
-               id: row.get(0)?,
-               name: row.get(1)?,
-               discovered: row.get(2)?,
-               description: row.get(3)?,
-               hp_refound: row.get(4)?,
-               mana_cost: row.get(5)?,
-               mana_refound: row.get(6)?,
-               magic_resist_debuff: row.get(7)?,
-               magic_resist_buff: row.get(8)?,
-               armor_debuff: row.get(9)?,
-               armor_buff: row.get(10)?,
-               attack_dmg: row.get(11)?,
-               attack_dmg_buff: row.get(12)?,
-               magic_dmg: row.get(13)?,
-               magic_dmg_buff: row.get(14)?,
-               for_allies: row.get(15)?,
-               entity_id: row.get(16)?,
-               player_id: row.get(17)?,
-           })
-       }).expect("Erreur lors de l'exécution de la requête");
+        let skills_iter = stmt.query_map([param], |row| {
+            // Récupération du player_id qui peut être NULL
+            let player_id_opt: Option<i32> = row.get(17)?;
 
-       let mut skills = Vec::new();
-       for skill in skills_iter {
-           if let Ok(skill) = skill {
-               skills.push(skill);
-           }
-       }
-       skills
-   }
+            Ok(Skill {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                discovered: row.get(2)?,
+                description: row.get(3)?,
+                hp_refound: row.get(4)?,
+                mana_cost: row.get(5)?,
+                mana_refound: row.get(6)?,
+                magic_resist_debuff: row.get(7)?,
+                magic_resist_buff: row.get(8)?,
+                armor_debuff: row.get(9)?,
+                armor_buff: row.get(10)?,
+                attack_dmg: row.get(11)?,
+                attack_dmg_buff: row.get(12)?,
+                magic_dmg: row.get(13)?,
+                magic_dmg_buff: row.get(14)?,
+                for_allies: row.get(15)?,
+                entity_id: row.get(16)?,
+                player_id: player_id_opt.unwrap_or(0), // Convertir NULL en 0
+            })
+        }).expect("Erreur lors de l'exécution de la requête pour les skills");
+
+        let mut skills = Vec::new();
+        for skill in skills_iter {
+            match skill {
+                Ok(s) => skills.push(s),
+                Err(e) => eprintln!("Erreur lors de la récupération d'un skill: {}", e),
+            }
+        }
+
+
+        skills
+    }
     pub fn equip_skill(&self, player: &mut Player, skill_id: i32) -> Result<()> {
         // Vérifier si le joueur a moins de 3 compétences
         if player.entity.skills.len() >= 3 {
@@ -722,5 +728,42 @@ impl DatabaseManager {
         )?;
         Ok(())
     }
-    
+
+    fn sauvegarde_skills_shadow(conn: &Connection, skill: &Skill, entity_id: i32) -> Result<(), Box<dyn std::error::Error>> {
+        if skill.id == 0 {
+            // Insertion d'une nouvelle compétence avec l'entity_id fourni
+            conn.execute(
+                "INSERT INTO skills (name, discovered, description, hp_refound, mana_cost, mana_refound,
+                magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg,
+                attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id)
+                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)",
+                rusqlite::params![
+                    skill.name,
+                    skill.discovered,
+                    skill.description,
+                    skill.hp_refound,
+                    skill.mana_cost,
+                    skill.mana_refound,
+                    skill.magic_resist_debuff,
+                    skill.magic_resist_buff,
+                    skill.armor_debuff,
+                    skill.armor_buff,
+                    skill.attack_dmg,
+                    skill.attack_dmg_buff,
+                    skill.magic_dmg,
+                    skill.magic_dmg_buff,
+                    skill.for_allies,
+                    entity_id,  // Utilise l'entity_id passé en paramètre
+                    skill.player_id
+                ],
+            )?;
+        } else {
+            // Mise à jour de l'entity_id pour une compétence existante
+            conn.execute(
+                "UPDATE skills SET entity_id = ?1 WHERE id = ?2",
+                rusqlite::params![entity_id, skill.id],
+            )?;
+        }
+        Ok(())
+    }
 }

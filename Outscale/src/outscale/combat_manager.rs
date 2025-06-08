@@ -384,7 +384,6 @@ impl CombatManager {
 
     pub(crate) fn retire_stat_objets(&mut self) {
         if self.allies_sans_stat_inventaire.len() != self.allies.len() {
-            println!("Impossible de restaurer les stats : sauvegarde incohérente.");
             return;
         }
         for (ally, original) in self.allies.iter_mut().zip(self.allies_sans_stat_inventaire.iter()) {
