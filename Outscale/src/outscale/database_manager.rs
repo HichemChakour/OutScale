@@ -603,21 +603,22 @@ impl DatabaseManager {
         // Requête SQL qui sélectionne les compétences soit par player_id, soit par entity_id
         let query = if player_id != 0 {
             "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound,
-                magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff,
-                attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id
-         FROM skills WHERE player_id = ?1"
+                    magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff,
+                    attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id
+             FROM skills WHERE player_id = ?1"
         } else {
             "SELECT id, name, discovered, description, hp_refound, mana_cost, mana_refound,
-                magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff,
-                attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id
-         FROM skills WHERE entity_id = ?1"
+                    magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff,
+                    attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id
+             FROM skills WHERE entity_id = ?1"
         };
 
         let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête pour les skills");
         let param = if player_id != 0 { player_id } else { entity_id };
 
         let skills_iter = stmt.query_map([param], |row| {
-            // Récupération du player_id qui peut être NULL
+            // Gestion des valeurs NULL
+            let entity_id_opt: Option<i32> = row.get(16)?;
             let player_id_opt: Option<i32> = row.get(17)?;
 
             Ok(Skill {
@@ -637,8 +638,8 @@ impl DatabaseManager {
                 magic_dmg: row.get(13)?,
                 magic_dmg_buff: row.get(14)?,
                 for_allies: row.get(15)?,
-                entity_id: row.get(16)?,
-                player_id: player_id_opt.unwrap_or(0), // Convertir NULL en 0
+                entity_id: entity_id_opt.unwrap_or(-1),  // Utiliser -1 comme valeur par défaut
+                player_id: player_id_opt.unwrap_or(0),   // Utiliser 0 comme valeur par défaut
             })
         }).expect("Erreur lors de l'exécution de la requête pour les skills");
 
@@ -650,6 +651,9 @@ impl DatabaseManager {
             }
         }
 
+        if skills.is_empty() {
+            println!("Aucun skill trouvé pour l'entité {} (player_id: {})", entity_id, player_id);
+        }
 
         skills
     }
