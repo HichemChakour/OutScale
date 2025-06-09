@@ -1,1 +1,23 @@
-Coucou
+[italique]À peine arrives-tu devant les portes d’[bleu]Avignaura[/bleu] que tu entends des gardes crier au voleur en poursuivant une personne encapuchonnée qui court dans ta direction. Sans même réfléchir, tu te mets en position de combat.[/italique]
+« Lève-toi… allez... je voulais pas… »
+Rien.
+« Je t’ai pas… je voulais juste… »
+Et là, ton cœur se serre.
+Quelque chose au fond de toi se réveille.
+Une chaleur étrange.
+Non, pas une chaleur… un vide… un appel.
+Ton bras se lève sans que tu le contrôles vraiment.
+Une lueur noire et bleutée s’échappe de tes doigts.
+Choix : Invoquer (chances de réussite : 90%)
+[rouge]INVOCATION[/rouge]
+Une jeune femme te fixe, un peu inquiète, mais pas effrayée.
+« Eh bah ça alors... C’est pas tous les jours qu’on voit un [rouge]Éclatax[/rouge] relever un mort devant les portes de la ville. Je t’ai jamais vu ici. »
+Elle tend la main avec un petit sourire. Moi : “Je viens d’arriver”
+« T’as pas l’air méchant. Et t’as pas l’air de savoir ce que tu fais non plus.
+Moi c’est Naelys. Si tu veux, je peux te faire visiter [bleu]Avignaura[/bleu]. T’as l’air d’en avoir besoin, suis-moi ! »
+Naelys te fait visiter la ville, ses explications sont plutôt désorganisées mais tu retiens les principales informations.
+Depuis la ville, tu peux te reposer et t'organiser pour partir combattre. Il y a deux principales zones de combat ici :
+Les Remparts : Lieux abritant des ennemis d'assez bas niveau, idéal pour s'améliorer.
+Rocher des Doms : Le front de la guerre, on peut y trouver des ennemis plus puissants.
+Palais des Papes : La résidence du [Rouge]Pape[/Rouge], endroit pour le moment inaccessible.
+Vous remerciez Naelys avant de vous séparer...
