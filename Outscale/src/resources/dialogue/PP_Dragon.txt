@@ -1,4 +1,4 @@
-[italique]Vous vous dirigez vers le [gras]Palais des Papes[:gras]. Vous vous empressez de survoler le Pont d'[bleu]Avignaura[/bleu] sur le dos de votre [vert]Dragon[/vert].[/italique]
+[italique]Vous vous dirigez vers le [gras]Palais des Papes[/gras]. Vous vous empressez de survoler le Pont d'[bleu]Avignaura[/bleu] sur le dos de votre [vert]Dragon[/vert].[/italique]
 [italique]Après quelques minutes de vol, vous atterrissez enfin dans la Cour du [gras]Palais des Papes[/gras].[/italique]
 [italique]Il est gigantesque parmi les forêts alentours. La porte imposante s'ouvre devant vous et un homme encapuchonné en sort.[/italique]
 « Vous voilà enfin, mon garçon. J'ai pu observer votre étrange pouvoir depuis que vous êtes arrivé et je dois bien avouer qu'il est fascinant.»

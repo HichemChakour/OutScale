@@ -1,12 +1,14 @@
 //use crate::skills::inventaire::Inventaire;
 
-#[derive(Clone, Debug, PartialEq)]
+use serde::Deserialize;
+
+#[derive(Clone, Debug, PartialEq, Deserialize)]
 pub struct Objet {
         pub id: i32,
         pub inventaire_id: i32,
         pub nom: String,
         pub degats: i32,
-        pub degats_magiques: i32,
+        pub degats_magique: i32,
         pub armure: i32,
         pub magic_resist: i32,
         pub mana: i32,
@@ -22,7 +24,7 @@ pub struct Objet {
             inventaire_id : i32,
             nom: String,
             degats: i32,
-            degats_magiques: i32,
+            degats_magique: i32,
             armure: i32,
             magic_resist: i32,
             mana: i32,
@@ -36,7 +38,7 @@ pub struct Objet {
                 inventaire_id,
                 nom,
                 degats,
-                degats_magiques,
+                degats_magique,
                 armure,
                 magic_resist,
                 mana,
@@ -52,7 +54,7 @@ pub struct Objet {
                 inventaire_id: -1,
                 nom: "Aucun".to_string(),
                 degats: 0,
-                degats_magiques: 0,
+                degats_magique: 0,
                 armure: 0,
                 magic_resist: 0,
                 mana: 0,

@@ -30,7 +30,7 @@ mod tests {
                 inventaire_id INTEGER,
                 nom TEXT,
                 degats INTEGER,
-                degats_magiques INTEGER,
+                degats_magique INTEGER,
                 armure INTEGER,
                 magic_resist INTEGER,
                 mana INTEGER,
@@ -62,7 +62,7 @@ mod tests {
         ).unwrap();
 
         db_manager.conn.execute(
-            "INSERT INTO objet (id, inventaire_id, nom, degats, degats_magiques, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet)
+            "INSERT INTO objet (id, inventaire_id, nom, degats, degats_magique, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet)
              VALUES
              (1, 1, 'Casque', 0, 0, 5, 0, 0, 0, 0, 10, 'Tete'),
              (2, 1, 'Plastron', 0, 0, 10, 0, 0, 0, 0, 20, 'Torse'),
@@ -117,7 +117,7 @@ mod test_get_inventaire_entity {
                 inventaire_id INTEGER,
                 nom TEXT,
                 degats INTEGER,
-                degats_magiques INTEGER,
+                degats_magique INTEGER,
                 armure INTEGER,
                 magic_resist INTEGER,
                 mana INTEGER,
@@ -145,7 +145,7 @@ fn test_get_inventaire_by_id_entity() {
     ).unwrap();
 
     db_manager.conn.execute(
-        "INSERT INTO objet (id, inventaire_id, nom, degats, degats_magiques, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet)
+        "INSERT INTO objet (id, inventaire_id, nom, degats, degats_magique, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet)
          VALUES
          (1, 1, 'Casque', 0, 0, 5, 0, 0, 0, 0, 10, 'Tete'),
          (2, 1, 'Plastron', 0, 0, 10, 0, 0, 0, 0, 20, 'Torse'),

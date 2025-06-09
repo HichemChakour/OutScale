@@ -14,6 +14,9 @@ use crossterm::{
     terminal::{ClearType, Clear},
 };
 use crate::outscale::les_remparts::lancer_les_remparts;
+use crate::outscale::levelup_manager::LevelUpManager;
+use crate::outscale::loot_manager::LootManager;
+
 
 fn apply_styles(text: &str) -> String {
     let styles = vec![
@@ -160,6 +163,7 @@ fn combattre_ennemi_zone(db_manager: &DatabaseManager, zone_actuelle: &str, play
             println!("Les Remparts sont assaillis par des hordes de monstres!");
             println!("Une nouvelle vague arrive...");
             lancer_les_remparts(player);
+            return;
         },
         "AvignAura" => {
             // Ennemi de la ville d'AvignAura
@@ -209,13 +213,29 @@ fn combattre_ennemi_zone(db_manager: &DatabaseManager, zone_actuelle: &str, play
         i += 1;
     }
 
+    let save_ennemies: Vec<Box<dyn HasEntity>> = ennemis.iter().map(|e| e.clone()).collect();
     // Créer et lancer le combat
     let mut combat_manager = CombatManager::new(allies, ennemis);
     combat_manager.start_combat_loop();
 
-    // Mettre à jour le joueur après le combat
-    // Cette partie est simplifiée - dans une implémentation complète,
-    // il faudrait synchroniser toutes les entités après le combat
+    if combat_manager.victory{
+        let mut loot_manager = LootManager::new("src/resources/item.json");
+        let mut objet_dropped = loot_manager.loot_random_item();
+        println!("Un objet a été trouvé : \x1b[33m{}\x1b[0m", objet_dropped.nom);
+        if let Some(inventaire) = player.entity.inventaire.as_mut() {
+            inventaire.liste_objets.push(objet_dropped);
+            println!("L'objet a été ajouté à l'inventaire !");
+        } else {
+            println!("Aucun inventaire trouvé pour le joueur, impossible d'ajouter l'objet.");
+        }
+        let xp_result = LevelUpManager::distribute_xp_to_player(player, combat_manager.total_xp);
+        println!("{}", xp_result);
+        let progress = LevelUpManager::show_xp_progress(player);
+        println!("{}", progress);
+        // Proposer l'extraction des ennemis vaincus
+        use crate::outscale::extraction_manager::ExtractionManager;
+        ExtractionManager::offer_extraction(&*save_ennemies);
+    }
     db_manager.sauvegarde(player.clone());
 }
 
@@ -424,8 +444,14 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
             }
             "Palais des Papes" => {
                 deplacement_zone(db_manager, "Palais des Papes");
-                self::redaction_histoire("src/resources/dialogue/PP_Dragon.txt");
-                menu_principal(db_manager, "Palais des Papes", player);
+                if player.ombres.iter().any(|ombre| ombre.entity.name == "Le dragon noir"){
+                    self::redaction_histoire("src/resources/dialogue/PP_Dragon.txt");
+                    menu_principal(db_manager, "Palais des Papes", player);
+                }
+                else{
+                    self::redaction_histoire("src/resources/dialogue/PP.txt");
+                    menu_principal(db_manager, "AvignAura", player);
+                }
             }
             "q" => {
                 println!("Quitter le jeu...");
@@ -471,13 +497,13 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
 fn indice(zone_actuelle: &str) {
     match zone_actuelle {
         "AvignAura" => {
-            println!("\x1b[36mIndice pour AvignAura :\x1b[0m Naelys vous a indiqué qu'il y avait 'Les Remparts' et 'Rocher des Doms' accessibles depuis la ville. Peut-être qu'il faut l'écrire quelque part ?");
+            println!("\x1b[36mIndice pour AvignAura :\x1b[0m Naelys vous a indiqué qu'il y avait '\x1b[35mLes Remparts\x1b[0m' et '\x1b[33mRocher des Doms\x1b[0m' accessibles depuis la ville. Peut-être qu'il faut l'écrire quelque part ?");
         },
         "Les Remparts" => {
-            println!("\x1b[36mIndice pour Les Remparts :\x1b[0m Les vagues ne s’arrêtent jamais. Seuls les plus endurants triomphent ici. Rassemble tes ombres et tiens bon !");
+            println!("\x1b[36mIndice pour Les Remparts :\x1b[0m La légende raconte qu'une stèle mystérieuse existe sur ce territoire, peut-être faut-il les repousser un peu plus loin ?");
         },
         "Rocher des Doms" => {
-            println!("\x1b[36mIndice pour le Rocher des Doms :\x1b[0m La légende raconte qu'une stèle mystérieuse existe sur ce territoire, peut être faut-il aller plus loin ?");
+            println!("\x1b[36mIndice pour le Rocher des Doms :\x1b[0m Votre zone de première mission on vous conseille de venir ici avant d'aller aux Remparts");
         },
         "MontFavé" => {
             println!("\x1b[36mIndice pour le MontFavé :\x1b[0m Le dragon noir sommeille, mais il ne pardonnera pas l’imprudence. Prépare tes meilleures ombres !");

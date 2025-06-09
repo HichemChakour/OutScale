@@ -40,12 +40,12 @@ impl DatabaseManager {
 
     pub fn insert_player(&self) -> Result<(), Box<dyn std::error::Error>> {
         let mut nom = String::new();
-        println!("Bonjour Éclatax quel est votre nom ?:");
+        println!("Bonjour \x1b[32mÉclatax\x1b[0m quel est votre nom ?:");
         io::stdin().read_line(&mut nom)?;
         let nom = nom.trim();
         self.conn.execute(
-            "INSERT INTO player (nom,max_hp,hp,max_mana,mana,magic_resist,armor,attack_damage,magic_damage,speed,dodge_chance,level,xp)\
-             VALUES (?1, 30, 30, 30, 30, 5, 5, 10, 10, 5, 10.0,1,0)",
+            "INSERT INTO player (nom,max_hp,hp,max_mana,mana,magic_resist,armor,attack_damage,magic_damage,speed,dodge_chance,level,xp,classe_id)\
+             VALUES (?1, 100, 100, 30, 30, 5, 5, 10, 10, 5, 10.0,1,0,0)",
             &[nom],
         )?;
         Ok(())
@@ -102,7 +102,6 @@ impl DatabaseManager {
 
             // Récupérer l'ID de l'entité nouvellement insérée
             entity_id = self.conn.last_insert_rowid() as i32;
-            println!("Insert entity id: {}", entity_id);
             // Mettre à jour l'entity_id des compétences associées à cette ombre
             for skill in &shadow.entity.skills {
                 if let Err(e) = Self::sauvegarde_skills_shadow(&self.conn, skill, entity_id) {
@@ -132,7 +131,7 @@ impl DatabaseManager {
                 inventaire_id: row.get(1)?,
                 nom: row.get(2)?,
                 degats: row.get(3)?,
-                degats_magiques: row.get(4)?,
+                degats_magique: row.get(4)?,
                 armure: row.get(5)?,
                 magic_resist: row.get(6)?,
                 mana: row.get(7)?,
@@ -175,7 +174,7 @@ impl DatabaseManager {
                 inventaire_id: row.get(1)?,
                 nom: row.get(2)?,
                 degats: row.get(3)?,
-                degats_magiques: row.get(4)?,
+                degats_magique: row.get(4)?,
                 armure: row.get(5)?,
                 magic_resist: row.get(6)?,
                 mana: row.get(7)?,
@@ -243,7 +242,7 @@ impl DatabaseManager {
 
         // Récupérer tous les objets associés à l'inventaire_id, sauf ceux déjà instanciés
         let mut stmt = self.conn.prepare(
-            "SELECT id, inventaire_id, nom, degats, degats_magiques, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet
+            "SELECT id, inventaire_id, nom, degats, degats_magique, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet
          FROM objet
          WHERE inventaire_id = ?1
          AND id NOT IN (?2, ?3, ?4, ?5, ?6)",
@@ -256,7 +255,7 @@ impl DatabaseManager {
                     inventaire_id: row.get(1)?,
                     nom: row.get(2)?,
                     degats: row.get(3)?,
-                    degats_magiques: row.get(4)?,
+                    degats_magique: row.get(4)?,
                     armure: row.get(5)?,
                     magic_resist: row.get(6)?,
                     mana: row.get(7)?,
@@ -367,13 +366,13 @@ impl DatabaseManager {
         // Insertion des nouveaux objets
         for objet in objets_a_inserer {
             self.conn.execute(
-                "INSERT INTO objet (inventaire_id, nom, degats, degats_magiques, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet)
+                "INSERT INTO objet (inventaire_id, nom, degats, degats_magique, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
                 rusqlite::params![
-                objet.inventaire_id,
+                7,
                 objet.nom,
                 objet.degats,
-                objet.degats_magiques,
+                objet.degats_magique,
                 objet.armure,
                 objet.magic_resist,
                 objet.mana,
@@ -508,7 +507,7 @@ impl DatabaseManager {
     }
 
     fn get_shadows(conn: &Connection) -> Vec<Shadow> {
-        let query = "SELECT id,nom, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp ,classe_id FROM entity WHERE enemy = false";
+        let query = "SELECT id,nom, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp ,classe_id FROM entity WHERE enemy = false and used = true";
         let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
         let shadows_iter = stmt.query_map([], |row| {
             Ok(Shadow {
@@ -641,9 +640,6 @@ impl DatabaseManager {
             }
         }
 
-        if skills.is_empty() {
-            println!("Aucun skill trouvé pour l'entité {} (player_id: {})", entity_id, player_id);
-        }
 
         skills
     }

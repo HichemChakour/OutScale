@@ -13,6 +13,7 @@ pub struct CombatManager {
     pub turn_order: Vec<Box<dyn HasEntity>>,
     allies_sans_stat_inventaire: Vec<Box<dyn HasEntity>>,
     pub victory: bool,
+    pub total_xp: i32,
 }
 
 #[derive(Debug)]
@@ -38,6 +39,7 @@ impl CombatManager {
             turn_order: Vec::new(),
             allies_sans_stat_inventaire: Vec::new(),
             victory: false,
+            total_xp: 0,
         }
     }
 
@@ -113,7 +115,7 @@ impl CombatManager {
                     'skill_menu: loop {
                         println!("Choisissez une compétence (ou tapez 'q' pour revenir) :");
 
-                        let skills = player.entity().skills.clone(); // Clone pour éviter les problèmes d'emprunt
+                        let skills = player.entity().skills.clone(); 
                         for (i, skill) in skills.iter().enumerate() {
                             println!("\x1b[33m{}\x1b[0m. \x1b[35m{}\x1b[0m", i + 1, skill.name);
                         }
@@ -255,8 +257,8 @@ impl CombatManager {
                            let (_typ, ent) = &all_entities[index - 1];
                             let entity = ent.entity();
                             println!("--- Statistiques de {} ---", entity.name);
-                            println!("PV: \x1b[32m{}\x1b[0m", entity.hp);
-                            println!("Mana: \x1b[32m{}\x1b[0m", entity.mana);
+                            println!("PV: \x1b[32m{}/{}\x1b[0m", entity.hp, entity.max_hp);
+                            println!("Mana: \x1b[32m{}/{}\x1b[0m", entity.mana, entity.max_mana);
                             println!("Attaque dmg: \x1b[32m{}\x1b[0m", entity.attack_dmg);
                             println!("Dégâts magiques: \x1b[32m{}\x1b[0m", entity.magic_dmg);
                             println!("Armure: \x1b[32m{}\x1b[0m", entity.armor);
@@ -303,6 +305,10 @@ impl CombatManager {
     }
 
     fn enemy_turn(&mut self, enemy: Box<dyn HasEntity>) {
+        if(enemy.entity().hp<=0) {
+            println!("\x1b[31m{}\x1b[0m est déjà mort et ne peut pas jouer ", enemy.entity().name);
+            return;
+        }
         println!("C'est au tour de \x1b[31m{}\x1b[0m de jouer ", enemy.entity().name);
         thread::sleep_ms(1000);
         EnnemiManager::enemy_action(enemy, &mut self.allies, &mut self.enemies);
@@ -312,6 +318,7 @@ impl CombatManager {
     // Dans combat_manager.rs, modifiez le code existant de start_combat_loop
     pub fn start_combat_loop(&mut self) {
         println!("Le combat commence !");
+        self.total_xp = self.enemies.iter().map(|e| e.entity().xp).sum();
         let defeated_enemies = self.enemies.clone();
         self.rajout_stat_objets();
         while !self.allies.is_empty() && !self.enemies.is_empty() {
@@ -349,20 +356,6 @@ impl CombatManager {
         } else {
             self.victory = true;
             println!("Les alliés ont gagné !");
-
-            // Distribution de l'XP aux alliés
-            use crate::outscale::levelup_manager::LevelUpManager;
-            let xp_result = LevelUpManager::distribute_xp(&mut self.allies, &defeated_enemies);
-            println!("{}", xp_result);
-
-            // Afficher la progression vers le prochain niveau
-            let progress = LevelUpManager::show_xp_progress(&self.allies);
-            println!("{}", progress);
-
-            // Proposer l'extraction des ennemis vaincus
-            use crate::outscale::extraction_manager::ExtractionManager;
-            ExtractionManager::offer_extraction(&defeated_enemies);
-            
             // Vérifier si des ennemis spéciaux ont été vaincus et afficher un texte spécifique
             for enemy in &defeated_enemies {
                 if enemy.entity().name.contains("Le dragon noir") {
@@ -398,7 +391,7 @@ impl CombatManager {
                 }
             }
         }
-        
+
     }
 
     pub(crate) fn retire_stat_objets(&mut self) {

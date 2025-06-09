@@ -7,11 +7,15 @@ use rand::prelude::IndexedRandom;
 pub struct ShadowManager;
 
 impl ShadowManager {
- pub fn show_available_shadows(db_manager: &DatabaseManager) -> Vec<Shadow> {
+ pub fn show_available_shadows(db_manager: &DatabaseManager, player: Player) -> Vec<Shadow> {
      let conn = &db_manager.conn;
+
      // Récupérer les ombres disponibles (enemy = false et used = false)
-     let query = "SELECT id, nom, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp, classe_id FROM entity WHERE enemy = false AND used = false";
-     let mut stmt = conn.prepare(query).expect("Erreur lors de la préparation de la requête");
+     let query = format!(
+         "SELECT id, nom, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, level, xp, classe_id FROM entity WHERE enemy = false AND used = false AND id NOT IN ({})",
+         player.ombres.iter().map(|s| s.entity.id.to_string()).collect::<Vec<_>>().join(",")
+     );
+     let mut stmt = conn.prepare(&*query).expect("Erreur lors de la préparation de la requête");
 
      let shadows_iter = stmt.query_map([], |row| {
          Ok(Shadow {
@@ -38,8 +42,10 @@ impl ShadowManager {
      }).expect("Erreur lors de l'exécution de la requête");
 
      let mut shadows = Vec::new();
-     for shadow in shadows_iter {
-         shadows.push(shadow.expect("Erreur lors de la récupération d'une ombre"));
+     for shadow_result in shadows_iter {
+         let mut shadow = shadow_result.expect("Erreur lors de la récupération d'une ombre");
+         shadow.entity.skills = DatabaseManager::get_skills_by_entity_id(&db_manager.conn, shadow.entity.id, 0);
+         shadows.push(shadow);
      }
 
      shadows
@@ -50,8 +56,8 @@ impl ShadowManager {
      println!("Ombres actuellement dans votre équipe :");
  
      // Si le joueur a plus de 2 ombres, on en enlève une au hasard
-     if player.ombres.len() > 2 {
-         let mut rng = rand::rng();
+     while player.ombres.len() > 2 {
+         let mut rng = rand::thread_rng();
          let idx = (0..player.ombres.len()).collect::<Vec<_>>().choose(&mut rng).cloned().unwrap();
          let removed_shadow = player.ombres.remove(idx);
          // On libère l'ombre dans la base de données
@@ -70,13 +76,12 @@ impl ShadowManager {
      }
  
      println!("\nOmbres disponibles :");
-     let available_shadows = Self::show_available_shadows(db_manager);
+     let available_shadows = Self::show_available_shadows(db_manager, player.clone());
  
      if available_shadows.is_empty() {
          println!("Aucune ombre disponible pour le moment.");
          return;
      }
- 
      for (i, shadow) in available_shadows.iter().enumerate() {
          let classe_name = Self::get_class_name(db_manager, shadow.entity.classe_id);
          println!("{}: {} (Nv {}) - PV: {}/{} - Classe: {}",
@@ -198,6 +203,7 @@ impl ShadowManager {
 
                      // Marquer la nouvelle ombre comme utilisée
                      let update_query = "UPDATE entity SET used = true WHERE id = ?1";
+                     println!("{}", update_query);
                      db_manager.conn.execute(update_query, [new_shadow.entity.id])
                          .expect("Erreur lors de la mise à jour du statut de la nouvelle ombre");
 

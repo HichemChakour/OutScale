@@ -166,15 +166,19 @@ fn equiper_selon_type(inventaire: &mut Inventaire, objet: Objet) -> bool {
             println!("{} équipé sur le torse.", objet.nom);
             true
         }
-        "main1" => {
-            std::mem::swap(&mut inventaire.main1, &mut objet.clone());
-            println!("{} équipé en main principale.", objet.nom);
-            true
-        }
-        "main2" => {
-            std::mem::swap(&mut inventaire.main2, &mut objet.clone());
-            println!("{} équipé en main secondaire.", objet.nom);
-            true
+        "arme" => {
+            if inventaire.main1.id == Objet::objet_vide().id {
+                std::mem::swap(&mut inventaire.main1, &mut objet.clone());
+                println!("{} équipé en main principale.", objet.nom);
+                true
+            } else if inventaire.main2.id == Objet::objet_vide().id {
+                std::mem::swap(&mut inventaire.main2, &mut objet.clone());
+                println!("{} équipé en main secondaire.", objet.nom);
+                true
+            } else {
+                println!("Les deux mains sont déjà occupées.");
+                false
+            }
         }
         _ => {
             println!("Impossible d'équiper cet objet à cet emplacement.");

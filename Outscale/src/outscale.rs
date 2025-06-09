@@ -11,6 +11,8 @@ mod extraction_manager;
 mod levelup_manager;
 mod shadow_manager;
 mod inventaire_manager;
+mod loot_manager;
+
 
 use std::env;
 use crate::entities::entity::{HasEntity};
@@ -27,7 +29,6 @@ pub fn get_db_path() -> String {
 }
 
 pub fn run() {
-
     let mut player : Player;
     if !database_manager::DatabaseManager::file_exists(DB_PATH) {
         println!("Création d'une nouvelle partie...");

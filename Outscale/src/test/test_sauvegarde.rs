@@ -60,7 +60,7 @@ mod tests {
                 inventaire_id INTEGER,
                 nom TEXT DEFAULT NULL,
                 degats INTEGER DEFAULT NULL,
-                degats_magiques INTEGER DEFAULT NULL,
+                degats_magique INTEGER DEFAULT NULL,
                 armure INTEGER DEFAULT NULL,
                 magic_resist INTEGER DEFAULT NULL,
                 mana INTEGER DEFAULT NULL,
@@ -164,14 +164,14 @@ mod tests {
             (5, &player.entity.inventaire.as_ref().unwrap().main2)
         ] {
             db_manager.conn.execute(
-                "INSERT INTO objet (id, inventaire_id, nom, degats, degats_magiques, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet)
+                "INSERT INTO objet (id, inventaire_id, nom, degats, degats_magique, armure, magic_resist, mana, taux_critique, vitesse, hp, type_objet)
                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
                 rusqlite::params![
                     id,
                     1,
                     &obj.nom,
                     obj.degats,
-                    obj.degats_magiques,
+                    obj.degats_magique,
                     obj.armure,
                     obj.magic_resist,
                     obj.mana,

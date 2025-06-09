@@ -4,34 +4,46 @@ use rusqlite::Connection;
 pub struct LevelUpManager;
 
 impl LevelUpManager {
-    pub fn distribute_xp(allies: &mut Vec<Box<dyn HasEntity>>, enemies: &Vec<Box<dyn HasEntity>>) -> String {
+    pub fn distribute_xp_to_player(player: &mut crate::entities::player::Player, xp: i32) -> String {
         let mut result = String::new();
 
-        // Calculer l'XP totale des ennemis vaincus
-        let total_xp: i32 = enemies.iter()
-            .map(|enemy| enemy.entity().xp)
-            .sum();
-        
-        // Distribuer l'XP aux alliés
-        for ally in allies.iter_mut() {
-            let current_xp = ally.entity().xp;
-            let new_xp = current_xp + total_xp;
+        let current_xp = player.entity.xp;
+        let new_xp = current_xp + xp;
 
-            result.push_str(&format!("\x1b[34m{}\x1b[0m gagne \x1b[33m{}\x1b[0m points d'expérience.\n",
-                ally.entity().name, total_xp));
+        result.push_str(&format!(
+            "\x1b[34m{}\x1b[0m gagne \x1b[33m{}\x1b[0m points d'expérience.\n",
+            player.entity.name, xp
+        ));
 
-            ally.entity_mut().xp = new_xp;
+        player.entity.xp = new_xp;
 
-            // Vérifier si l'allié monte de niveau
+        // Vérifier si le joueur monte de niveau
+        if new_xp >= 100 {
+            let level_ups = new_xp / 100;
+            let remaining_xp = new_xp % 100;
+
+            for _ in 0..level_ups {
+                Self::level_up(&mut player.entity, &mut result);
+            }
+
+            player.entity.xp = remaining_xp;
+        }
+
+        // Ajouter l'XP aux ombres
+        for ombre in &mut player.ombres {
+            let current_xp = ombre.entity.xp;
+            let new_xp = current_xp + xp;
+            ombre.entity.xp = new_xp;
+
             if new_xp >= 100 {
                 let level_ups = new_xp / 100;
                 let remaining_xp = new_xp % 100;
 
                 for _ in 0..level_ups {
-                    Self::level_up(ally.entity_mut(), &mut result);
+                    Self::level_up(&mut ombre.entity, &mut result);
                 }
 
-                ally.entity_mut().xp = remaining_xp;
+                ombre.entity.xp = remaining_xp;
             }
         }
 
@@ -43,7 +55,7 @@ impl LevelUpManager {
 
         // Augmenter les stats en fonction de la classe
         match entity.classe_id {
-            1 => Self::apply_necromancer_bonus(entity), // Nécromancien
+            0 => Self::apply_necromancer_bonus(entity), // Nécromancien
             2 => Self::apply_warrior_bonus(entity),     // Guerrier
             3 => Self::apply_sorcerer_bonus(entity),    // Sorcier
             4 => Self::apply_ranger_bonus(entity),      // Rôdeur
@@ -58,14 +70,14 @@ impl LevelUpManager {
     }
 
     fn apply_necromancer_bonus(entity: &mut crate::entities::entity::Entity) {
-        entity.max_hp += 10;
+        entity.max_hp += 50;
         entity.hp = entity.max_hp;
-        entity.max_mana += 15;
+        entity.max_mana += 69;
         entity.mana = entity.max_mana;
-        entity.magic_dmg += 8;
-        entity.attack_dmg += 2;
-        entity.magic_resist += 3;
-        entity.armor += 2;
+        entity.magic_dmg += 25;
+        entity.attack_dmg += 25;
+        entity.magic_resist += 19;
+        entity.armor += 9;
     }
 
     fn apply_warrior_bonus(entity: &mut crate::entities::entity::Entity) {
@@ -129,18 +141,26 @@ impl LevelUpManager {
     }
 
     // Méthode pour afficher la progression vers le prochain niveau
-    pub fn show_xp_progress(entities: &Vec<Box<dyn HasEntity>>) -> String {
+    pub fn show_xp_progress(player: &crate::entities::player::Player) -> String {
         let mut result = String::new();
-
         result.push_str("--- Progression d'XP ---\n");
-        for entity in entities {
-            let current_xp = entity.entity().xp;
-            let needed_xp = 100;
-            let percentage = (current_xp as f32 / needed_xp as f32) * 100.0;
 
+        // Afficher le joueur
+        let current_xp = player.entity.xp;
+        let needed_xp = 100;
+        let percentage = (current_xp as f32 / needed_xp as f32) * 100.0;
+        result.push_str(&format!(
+            "\x1b[34m{}\x1b[0m (Nv. \x1b[33m{}\x1b[0m): \x1b[32m{}/{}\x1b[0m XP (\x1b[33m{:.1}%\x1b[0m)\n",
+            player.entity.name, player.entity.level, current_xp, needed_xp, percentage
+        ));
+
+        // Afficher les ombres
+        for ombre in &player.ombres {
+            let current_xp = ombre.entity.xp;
+            let percentage = (current_xp as f32 / needed_xp as f32) * 100.0;
             result.push_str(&format!(
-                "\x1b[34m{}\x1b[0m (Nv. \x1b[33m{}\x1b[0m): \x1b[32m{}/{}\x1b[0m XP (\x1b[33m{:.1}%\x1b[0m)\n",
-                entity.entity().name, entity.entity().level, current_xp, needed_xp, percentage
+                "\x1b[34m{}\x1b[0m (Ombre, Nv. \x1b[33m{}\x1b[0m): \x1b[32m{}/{}\x1b[0m XP (\x1b[33m{:.1}%\x1b[0m)\n",
+                ombre.entity.name, ombre.entity.level, current_xp, needed_xp, percentage
             ));
         }
 

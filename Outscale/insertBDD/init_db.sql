@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS player (
     inventaire_id INTEGER DEFAULT NULL,
     level INTEGER DEFAULT 1,
     xp INTEGER DEFAULT 0,
+    classe_id INTEGER NOT NULL,
     FOREIGN KEY(inventaire_id) REFERENCES inventaire(id)
 );
 
@@ -168,18 +169,18 @@ INSERT INTO entity(nom, enemy, used, max_hp, hp, max_mana, mana, magic_resist, a
 
 /*Zone2 Le roché des doms*/
 INSERT INTO entity(nom, enemy, used, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
-        ('Gardien du temple', 1,0, 300, 300, 300, 300, 50, 50, 65, 5, 10, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'), 50, 2);
+        ('Gardien du temple', 1,0, 200, 200, 300, 70, 50, 50, 25, 5, 10, 0.1, (SELECT id FROM classe WHERE nom = 'Guerrier'), 75, 2);
 
 INSERT INTO  entity(nom, enemy, used, max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
-        ('Le prêtre', 1,0, 200, 200, 500, 500, 20, 20, 30, 70, 0, 0.2, (SELECT id FROM classe WHERE nom = 'Sorcier'), 50, 2);
+        ('Le prêtre', 1,0, 150, 150, 300, 500, 20, 20, 7, 70, 0, 0.2, (SELECT id FROM classe WHERE nom = 'Sorcier'), 75, 2);
 
 INSERT INTO  entity(nom, enemy, used,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES
-    ('L`imame', 1,0, 200, 200, 500, 500, 20, 20, 30, 70, 0, 0.2, (SELECT id FROM classe WHERE nom = 'Sorcier'), 50, 2);
+    ('L`imame', 1,0, 150, 150, 300, 300, 20, 20, 7, 70, 0, 0.2, (SELECT id FROM classe WHERE nom = 'Sorcier'), 75, 2);
 
 INSERT INTO skills (name, description, hp_refound, mana_cost, mana_refound, magic_resist_debuff, magic_resist_buff, armor_debuff, armor_buff, attack_dmg, attack_dmg_buff, magic_dmg, magic_dmg_buff, for_allies, entity_id, player_id) VALUES
-    ('Gros cout de massue', 'Inflige de lourds dégâts physiques à l`ennemi.', 0, 50, 0, 0, 0, 0, 0, 100, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Gardien du temple'), NULL),
+    ('Gros cout de massue', 'Inflige de lourds dégâts physiques à l`ennemi.', 0, 25, 0, 0, 0, 0, 0, 20, 0, 0, 0, FALSE, (SELECT id FROM entity WHERE nom = 'Gardien du temple'), NULL),
     ('Rappel Religieux', 'Soigne une partie des points de vie de l`entité.', 100, 30, 0, 0, 5, 0, 5, 0, 5, 0, 5, TRUE, (SELECT id FROM entity WHERE nom = 'L`imame'), NULL),
-    ('Bouclier magique', 'Augmente la résistance magique de l`entité.', 0, 40, 0, 0, 20, 0, 0, 0, 0, 0,0, FALSE, (SELECT id FROM entity WHERE nom = 'Le prêtre'), NULL);
+    ('Bouclier magique', 'Augmente la résistance magique de l`entité.', 0, 40, 0, 0, 20, 0, 0, 0, 0, 0,0, TRUE, (SELECT id FROM entity WHERE nom = 'Le prêtre'), NULL);
 
 /*Zone4 Le mont favé*/
 INSERT INTO entity(nom, enemy, used,  max_hp, hp, max_mana, mana, magic_resist, armor, attack_damage, magic_damage, speed, dodge_chance, classe_id, xp, level) VALUES

@@ -32,7 +32,7 @@ impl ExtractionManager {
 
     /// Tente l'extraction d'un ennemi avec une chance basée sur différents facteurs
     fn try_extraction(enemy: &Box<dyn HasEntity>) -> std::result::Result<(), Box<dyn std::error::Error>> {
-        println!("\x1b[32mExtraction de {}\x1b[0m, il rejoint vos shadows!", enemy.entity().name);
+        println!("\x1b[32mExtraction de {}\x1b[0m, il rejoint vos shadows vous pourrez le choisir dans le menu !", enemy.entity().name);
 
         let mut shadow = Shadow::new(enemy.entity().clone());
 

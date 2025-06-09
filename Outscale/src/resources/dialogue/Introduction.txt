@@ -29,7 +29,7 @@ Elle tend la main avec un petit sourire.
 Moi c’est Naelys. Si tu veux, je peux te faire visiter [bleu]Avignaura[/bleu]. T’as l’air d’en avoir besoin, suis-moi ! »
 Naelys te fait visiter la ville, ses explications sont plutôt désorganisées mais tu retiens les principales informations.
 Depuis la ville, tu peux te reposer et t'organiser pour partir combattre. Il y a deux principales zones de combat près de la ville :
-[magenta]Les Remparts[/magenta] : Lieux abritant des ennemis d'assez bas niveau, idéal pour s'améliorer.
-[jaune]Rocher des Doms[/jaune] : Le front de la guerre, on peut y trouver des ennemis plus puissants.
+[jaune]Rocher des Doms[/jaune]: Lieux abritant des ennemis d'assez bas niveau, idéal pour s'améliorer.
+[magenta]Les Remparts[/magenta]: Le front de la guerre, on peut y trouver des ennemis plus puissants.
 [gras]Palais des Papes[/gras] : La résidence du [rouge]Pape[/rouge], endroit pour le moment inaccessible car il a détruit le Pont d'[bleu]Avignaura[/bleu] permettant d'y accéder.
 Vous remerciez Naelys avant de vous séparer...

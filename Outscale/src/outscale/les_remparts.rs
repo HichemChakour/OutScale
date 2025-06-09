@@ -6,6 +6,7 @@ use std::fs::File;
 use std::io::{self, BufRead, BufReader, Write};
 use rand::prelude::IndexedRandom;
 use crate::outscale::cli_manager;
+use crate::outscale::loot_manager::LootManager;
 use crate::skills::skill::Skill;
 
 pub fn lancer_les_remparts(player: &mut crate::entities::player::Player) {
@@ -25,8 +26,8 @@ pub fn lancer_les_remparts(player: &mut crate::entities::player::Player) {
 fn lancer_combat_remparts(player: &mut crate::entities::player::Player, prefixes: &[String], suffixes: &[String], noms_complets: &[String], titres: &[String], nb_round: &mut i32) {
     loop {
         println!("Round {} des Remparts", nb_round);
-        let mut total_level = 6;
-        if( total_level > 12) {
+        let mut total_level = 5;
+        if( total_level > 7) {
             total_level = player.ombres.iter().map(|ombre| ombre.entity.level).sum::<i32>() + player.entity.level;
             return;
         }
@@ -53,14 +54,14 @@ fn lancer_combat_remparts(player: &mut crate::entities::player::Player, prefixes
                 5.0 + enemy_level as f32 * 0.2,
                 vec![],
                 enemy_level,
-                0,
-                1,
+                rng.random_range(5 + enemy_level * 2..=20 + enemy_level * 4),
+                rng.random_range(1..=4),
                 None,
             ));
             enemies.push(Box::new(enemy));
         }
         self::assigner_skills_aux_ennemis(&mut enemies);
-
+        let mut save_ennemies: Vec<Box<dyn HasEntity>> = enemies.iter().map(|e| e.clone()).collect();
         // Initialisation du combat
         let mut allies: Vec<Box<dyn HasEntity>> = player
             .ombres
@@ -76,13 +77,31 @@ fn lancer_combat_remparts(player: &mut crate::entities::player::Player, prefixes
         if !combat_manager.victory {
             println!("Vous avez été vaincu... Vous quittez les remparts.");
             write_nb_round("src/resources/prefixes_suffixes.txt", *nb_round);
-            break;
+            return;
         }
 
         // Demander au joueur s'il veut continuer
         if( *nb_round == 4) {
             cli_manager::redaction_histoire("src/resources/dialogue/Vue_MF.txt");
         }
+        let mut loot_manager = LootManager::new("src/resources/item.json");
+        let mut objet_dropped = loot_manager.loot_random_item();
+        use crate::outscale::levelup_manager::LevelUpManager;
+        
+        use crate::outscale::extraction_manager::ExtractionManager;
+        ExtractionManager::offer_extraction(&*save_ennemies);
+
+        println!("Un objet a été trouvé : \x1b[33m{}\x1b[0m", objet_dropped.nom);
+        if let Some(inventaire) = player.entity.inventaire.as_mut() {
+            inventaire.liste_objets.push(objet_dropped);
+            println!("L'objet a été ajouté à l'inventaire !");
+        } else {
+            println!("Aucun inventaire trouvé pour le joueur, impossible d'ajouter l'objet.");
+        }
+        let xp_result = LevelUpManager::distribute_xp_to_player(player, combat_manager.total_xp);
+        println!("{}", xp_result);
+        let progress = LevelUpManager::show_xp_progress(player);
+        println!("{}", progress);
         *nb_round += 1;
         println!("Souhaitez-vous continuer à combattre ? (o/n)");
         let mut choix = String::new();
@@ -93,6 +112,7 @@ fn lancer_combat_remparts(player: &mut crate::entities::player::Player, prefixes
             break;
         }
     }
+
 }
 fn generer_nom_aleatoire(
     prefixes: &[String],
