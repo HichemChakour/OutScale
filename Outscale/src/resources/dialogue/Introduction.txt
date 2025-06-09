@@ -19,5 +19,5 @@ Naelys te fait visiter la ville, ses explications sont plutôt désorganisées m
 Depuis la ville, tu peux te reposer et t'organiser pour partir combattre. Il y a deux principales zones de combat ici :
 Les Remparts : Lieux abritant des ennemis d'assez bas niveau, idéal pour s'améliorer.
 Rocher des Doms : Le front de la guerre, on peut y trouver des ennemis plus puissants.
-Palais des Papes : La résidence du [Rouge]Pape[/Rouge], endroit pour le moment inaccessible.
+Palais des Papes : La résidence du [Rouge]Pape[/Rouge], endroit pour le moment inaccessible car il a détruit le Pont d'Avignaura permettant d'y accéder.
 Vous remerciez Naelys avant de vous séparer...
