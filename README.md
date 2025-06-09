@@ -19,3 +19,5 @@ Bienvenue sur **OutScale** !
 Pour se déplacer dans le terminal il faut mettre le nom de la zone.
 L'équipement et les shadows équipés ne sont pas sauvegardé il faut les rééquiper à chaque fois que vous lancez le jeu.
 Si jamais vous galérez trop à faire le jeu. N'oubliez pas que vous êtes : The Honored One ( à tester dans le terminal :) )
+
+https://github.com/HichemChakour/OutScale
