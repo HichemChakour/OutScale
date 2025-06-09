@@ -363,7 +363,7 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
     println!("Vous êtes actuellement dans la zone : {}. Que comptez vous faire ?", zone_actuelle);
     println!("i. Ouvrir l'inventaire de votre personnage");
     println!("s. Ouvrir l'inventaire des Ombres");
-    println!("f. Combattre l'ennemie de zone");
+    println!("f. Combattre l'ennemi de zone");
     println!("c. Voir tout les lieux visités");
     println!("k. Gérer vos compétences");
     println!("indice. Avoir un indice");
@@ -399,7 +399,8 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
                 menu_principal(db_manager, zone_actuelle, player);
             },
             "indice" => {println!("Voici un indice...");
-                indice();
+                indice(zone_actuelle);
+                menu_principal(db_manager, zone_actuelle, player);
             },
             "MontFavé" => {
                 deplacement_zone(db_manager, "MontFavé");
@@ -467,9 +468,29 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
     }
 }
 
-fn indice() {
-    println!("Ps encore fait");
+fn indice(zone_actuelle: &str) {
+    match zone_actuelle {
+        "AvignAura" => {
+            println!("\x1b[36mIndice pour AvignAura :\x1b[0m Naelys vous a indiqué qu'il y avait 'Les Remparts' et 'Rocher des Doms' accessibles depuis la ville. Peut-être qu'il faut l'écrire quelque part ?");
+        },
+        "Les Remparts" => {
+            println!("\x1b[36mIndice pour Les Remparts :\x1b[0m Les vagues ne s’arrêtent jamais. Seuls les plus endurants triomphent ici. Rassemble tes ombres et tiens bon !");
+        },
+        "Rocher des Doms" => {
+            println!("\x1b[36mIndice pour le Rocher des Doms :\x1b[0m La légende raconte qu'une stèle mystérieuse existe sur ce territoire, peut être faut-il aller plus loin ?");
+        },
+        "MontFavé" => {
+            println!("\x1b[36mIndice pour le MontFavé :\x1b[0m Le dragon noir sommeille, mais il ne pardonnera pas l’imprudence. Prépare tes meilleures ombres !");
+        },
+        "Palais des Papes" => {
+            println!("\x1b[36mIndice pour le Palais des Papes :\x1b[0m L’entrée n’est accordée qu’aux héros dignes. Seul celui ayant vaincu le dragon pourra franchir le seuil sacré.");
+        },
+        _ => {
+            println!("\x1b[33mAucun indice disponible pour cette zone.\x1b[0m");
+        }
+    }
 }
+
 
 fn sauvegarde(db_manager: &DatabaseManager, player : Player) {
     db_manager.sauvegarde(player);

@@ -1,1 +1,1 @@
-[italique]Tous ces combats vous ont épuisé, vous rentrez à Avignaura...[/italique]
+[italique]Tous ces combats vous ont épuisé, vous rentrez à [bleu]Avignaura[/bleu]...[/italique]

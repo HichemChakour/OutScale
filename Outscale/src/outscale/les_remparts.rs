@@ -74,7 +74,7 @@ fn lancer_combat_remparts(player: &mut crate::entities::player::Player, prefixes
 
         // Vérification de la défaite
         if !combat_manager.victory {
-            println!("Vous avez été vaincu... Vous quitez les remparts.");
+            println!("Vous avez été vaincu... Vous quittez les remparts.");
             write_nb_round("src/resources/prefixes_suffixes.txt", *nb_round);
             break;
         }
