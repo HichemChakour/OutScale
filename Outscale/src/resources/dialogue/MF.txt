@@ -1,4 +1,4 @@
-[italique]Vous arrivez au pied du Mont Favet. Le vent souffle fort, chargé d’une odeur de cendres et de feu.[/italique]
+[italique]Vous arrivez au pied du [cyan]Mont Favet[/cyan]. Le vent souffle fort, chargé d’une odeur de cendres et de feu.[/italique]
 [italique]L'air est lourd. Un grondement sourd résonne dans la montagne.[/italique]
 [italique]Chaque pas que vous faites semble résonner dans l’immensité du lieu.[/italique]
-[italique]Tout à coup, vous entendez un hurlement sanglant qui se rapproche de vous, un dragon gigantesque apparait devant vous. Vous vous mettez en position de combat, prêt à en découdre.[/italique]
+[italique]Tout à coup, vous entendez un hurlement sanglant qui se rapproche de vous, un [rouge]dragon[/rouge] gigantesque apparait devant vous. Vous vous mettez en position de combat, prêt à en découdre...[/italique]

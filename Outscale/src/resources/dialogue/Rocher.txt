@@ -1,2 +1,2 @@
-[italique]Vous avancez dans les hauteurs du Rocher des Doms.[/italique]
-[italique]Le paysage y est magnifique, mais l’atmosphère est lourde devant le temple.[/italique]
+[italique]Vous avancez dans les hauteurs du [jaune]Rocher des Doms[/jaune].[/italique]
+[italique]Le paysage y est magnifique, mais l’atmosphère est lourde.[/italique]
