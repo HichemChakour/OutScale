@@ -363,7 +363,7 @@ pub fn menu_principal(db_manager: &DatabaseManager, zone_actuelle : &str, player
     println!("Vous êtes actuellement dans la zone : {}. Que comptez vous faire ?", zone_actuelle);
     println!("i. Ouvrir l'inventaire de votre personnage");
     println!("s. Ouvrir l'inventaire des Ombres");
-    println!("f. Combattre l'ennemie de zone");
+    println!("f. Combattre l'ennemi de zone");
     println!("c. Voir tout les lieux visités");
     println!("k. Gérer vos compétences");
     println!("indice. Avoir un indice");
